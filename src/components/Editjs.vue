@@ -24,8 +24,8 @@
                         </a-collapse>
                     </a-layout-sider>
                     <a-layout-content>
-                        <Tinymce lang="zh_CN" @preview="preview" @init-event="loading = false" 
-                            :field-info="{...data.main, lines: data.lines }" @line-event="editLineTable" ref="tmceInstance" />
+                        <Tinymce lang="zh_CN" @preview="preview" @init-event="loading = false" :config="config" :plugins="plugins" 
+                            :field-info="{...data.main, lines: data.lines }" ref="tmceInstance" />
                     </a-layout-content>
                 </a-layout>
             </a-tab-pane>
@@ -40,7 +40,7 @@
                     <span style="margin-right: 5px">{{title}}</span>
                     <a-icon class="tab-close" type="close" style="margin-right: 0" @click="closeTab(idx)" />
                 </span>
-                <EditLine :ref="'editLine' + (4 + idx)" @init-event="loading = false" :data="editLines[idx]" :actTab="akey" :tabIndex="'tab-' + (4 + idx)" />
+                <EditLine :ref="'editLine' + (4 + idx)" :plugins="plugins" @init-event="loading = false" :data="{main: editLines[idx]}" :actTab="akey" :tabIndex="'tab-' + (4 + idx)" />
             </a-tab-pane>
         </a-tabs>
     </a-spin>
@@ -51,7 +51,7 @@ import Tinymce from './Tinymce.vue'
 import EditLine from './EditLine.vue'
 import ErdMaker from 'element-resize-detector'
 import { constTableTpl } from './const'
-import { unique } from './plugin'
+import plugin, { unique } from './plugin'
 
 export default {
     components: {
@@ -65,7 +65,13 @@ export default {
             default() {
                 return {}
             }
-        }
+        },
+        plugins: {
+            type: Array,
+            default() {
+                return []
+            }
+        },
     },
 
     data() {
@@ -74,19 +80,30 @@ export default {
             height: 0,
             tabs: [],
             editLines: [],
-            loading: true
+            loading: true,
+            config: {}
         }
     },
 
     watch: {
         'akey': function (n, o) {
             if (n != o && n == 'tab-1') {
-                this.$refs.tmceInstance.rebuild();
+                this.$refs.tmceInstance.reload();
             }
         }
     },
 
     created() {
+        const vm = this;
+        this.plugins.push(plugin);
+        this.config['setup'] = function(editor) {
+            const plugins = vm.plugins;
+            for (let index = 0; index < plugins.length; index++) {
+                const plugin = plugins[index];
+                plugin(vm, editor);
+            }
+        }
+        
         const main = this.data.main.fields;
         for (let index = 0; index < main.length; index++) {
             const element = main[index];
@@ -109,7 +126,7 @@ export default {
         const self = this;
         ErdMaker().listenTo(this.$refs.leftPanel.$el, function (element) {
             self.height = element.offsetHeight;
-        })
+        });
     },
 
     methods: {
@@ -118,14 +135,41 @@ export default {
             setTimeout(() => { this.akey = 'tab-1' });
         },
 
-        insertField(isMain, meta) {
-            if (meta.disabled) return;
+        insertField(isMain, metadata) {
+            if (metadata.disabled) return;
             const { tmceInstance } = this.$refs;
             if (isMain) {
-                tmceInstance.insertField(meta);
+                const { DOM } = _resolve('tinymce.dom.DOMUtils');
+                const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
+                tmceInstance.insertElement(htmlField);
+                metadata.disabled = true;
+                tmceInstance.focus();
+
             } else {
-                this.openTab(meta);
+                this.openTab(metadata);
             }
+        },
+
+        insertLineTable(metadata, ctx) {
+            const tmceInstance = this.$refs.tmceInstance;
+            const { DOM } = _resolve('tinymce.dom.DOMUtils');
+            let lineTableBlock = DOM.$('#' + metadata.id, _activeEditor().getDoc());
+            if (lineTableBlock.length > 0) {
+                lineTableBlock = lineTableBlock[0];
+                lineTableBlock.innerHTML = ctx;
+                this.ctx = tmceInstance.getContent();
+                return;
+            }
+            const htmlLineTable = DOM.create('div', { class: 'unedit mce-table-line', title: metadata.table_comment, id: metadata.id });
+            htmlLineTable.innerHTML = ctx || '';
+            tmceInstance.insertElement(htmlLineTable);
+            metadata.disabled = true;
+            tmceInstance.focus();
+            this.ctx = tmceInstance.getContent();
+        },
+
+        editLineTable(e, metadata) {
+            this.openTab(metadata, e.target.innerHTML);
         },
 
         createTabToolbar() {
@@ -136,7 +180,6 @@ export default {
 
         tabSave() {
             const actTab = this.akey;
-            const { tmceInstance } = this.$refs;
             switch (actTab) {
                 case 'tab-1':
                 case 'tab-2':
@@ -146,45 +189,39 @@ export default {
                     const split = actTab.split('-');
                     const ref = this.$refs['editLine' + split[1]];
                     if (ref && ref.length > 0) {
-                        const ctx = ref[0].save();
+                        const result = ref[0].save();
                         ref[0].distory();
                         this.akey = 'tab-1';
                         // 销毁明细行面板
-                        const index = this.tabs.indexOf(ctx.meta.table_comment);
+                        const index = this.tabs.indexOf(result.metadata.table_comment);
                         if (index > -1) {
                             this.tabs.splice(index, 1);
                             this.editLines.splice(index, 1);
                         }
                         this.loading = true;
-                        $syncLoading(this, () => {
-                            tmceInstance.insertLineTable(ctx);
-                        })
+                        _syncLoading(this, () => {
+                            this.insertLineTable(result.metadata, result.ctx);
+                        });
                     }
                 }
 
             }
         },
 
-        editLineTable(e, meta) {
-            this.openTab(meta, e.target.innerHTML);
-        },
-
-        openTab(meta, ctx) {
+        openTab(metadata, ctx) {
             this.loading = true;
-            const { tmceInstance } = this.$refs;
-            let index = this.tabs.indexOf(meta.table_comment);
+            if (!ctx) {
+                this.insertLineTable(metadata);
+            }
+            let index = this.tabs.indexOf(metadata.table_comment);
             if (index < 0) {
-                this.tabs.push(meta.table_comment);
+                this.tabs.push(metadata.table_comment);
                 index = this.tabs.length - 1;
             }
-            this.editLines[index] = meta;
+            this.editLines[index] = metadata;
             this.akey = 'tab-' + (4 + index);
-            
-            if (!ctx) {
-                tmceInstance.insertLineTable({ meta });
-            }
             const self = this;
-            $syncLoading(this, () => {
+            _syncLoading(this, () => {
                 const ref = self.$refs['editLine' + (4 + index)][0];
                 ref.setContent(ctx || constTableTpl);
             })
@@ -209,13 +246,21 @@ export default {
     }
 }
 
-function $syncLoading(self, callback) {
+function _syncLoading(self, callback) {
     const timer = setInterval(() => {
         if (!self.loading) {
             clearInterval(timer);
             callback();
         }
     }, 500);
+}
+
+function _resolve(ctx, editor) {
+    return window['tinyMCE'].resolve(ctx, editor);
+}
+
+function _activeEditor() {
+    return window['tinyMCE'].activeEditor;
 }
 </script>
 

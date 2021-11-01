@@ -9,7 +9,7 @@
                 <a-collapse-panel key="2" header="数据源">
                     <a-tree blockNode :style="{height: height - 102 + 'px', overflow: 'auto'}" :show-line="true" :show-icon="true" :default-expanded-keys="['main']">
                         <a-tree-node :selectable="false" key="main" title="主表">
-                            <a-tree-node :disabled="f.disabled" v-for="(f, idx) in data.fields" :selectable="false" :key="'field-' + idx" :title="f.comment + '/' + f.name.toUpperCase()" @dblclick.native="insertField(f)" />
+                            <a-tree-node :disabled="f.disabled" v-for="(f, idx) in data.main.fields" :selectable="false" :key="'field-' + idx" :title="f.comment + '/' + f.name.toUpperCase()" @dblclick.native="insertField(f)" />
                         </a-tree-node>
                     </a-tree>
                     <a-icon slot="extra" type="setting" />
@@ -17,7 +17,7 @@
             </a-collapse>
         </a-layout-sider>
         <a-layout-content>
-            <Tinymce lang="zh_CN" ref="tmceInstance" :field-info="data" @init-event="$emit('init-event')" is-line :value="value" />
+            <Tinymce lang="zh_CN" ref="tmceInstance" :config="config" :plugins="plugins" :field-info="data" @init-event="$emit('init-event')" is-line :value="value" />
         </a-layout-content>
     </a-layout>
 </template>
@@ -38,6 +38,12 @@ export default {
                 return {}
             }
         },
+        plugins: {
+            type: Array,
+            default() {
+                return []
+            }
+        },
         actTab: [String, Number],
         tabIndex: [String, Number]
     },
@@ -45,14 +51,26 @@ export default {
     data() {
         return {
             height: 0,
-            value: ''
+            value: '',
+            config: {}
         }
     },
 
     watch: {
         'actTab': function (n, o) {
             if (n != o && n == this.tabIndex) {
-                this.$refs.tmceInstance.rebuild();
+                this.$refs.tmceInstance.reload();
+            }
+        }
+    },
+
+    created() {
+        const vm = this;
+        this.config['setup'] = function(editor) {
+            const plugins = vm.plugins;
+            for (let index = 0; index < plugins.length; index++) {
+                const plugin = plugins[index];
+                plugin(vm, editor);
             }
         }
     },
@@ -65,10 +83,14 @@ export default {
     },
 
     methods: {
-        insertField(meta) {
-            if (meta.disabled) return;
+        insertField(metadata) {
+            if (metadata.disabled) return;
             const { tmceInstance } = this.$refs;
-            tmceInstance.insertField(meta);
+            const { DOM } = _resolve('tinymce.dom.DOMUtils');
+            const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
+            tmceInstance.insertElement(htmlField);
+            metadata.disabled = true;
+            tmceInstance.focus();
         },
 
         setContent(ctx) {
@@ -79,7 +101,7 @@ export default {
         save() {
             const { tmceInstance } = this.$refs;
             return {
-                meta: this.data,
+                metadata: this.data.main,
                 ctx: tmceInstance.getContent()
             };
         },
@@ -89,6 +111,10 @@ export default {
             tmceInstance.distory();
         },
     }
+}
+
+function _resolve(ctx, editor) {
+    return window['tinyMCE'].resolve(ctx, editor);
 }
 </script>
 

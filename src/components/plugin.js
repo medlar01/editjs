@@ -1,5 +1,4 @@
 export default function(vm, editor) {
-    vm.editor = editor;
     if (vm.ctx) {
         editor.setContent(vm.ctx);
     }
@@ -58,10 +57,9 @@ export default function(vm, editor) {
 
     editor.on('dblclick', function(e) {
         if (containClass(e.target, 'mce-table-line')) {
-            const localField = vm.fieldInfo.fields.find(f => f.id == e.target.id)
-            || vm.fieldInfo.lines?.find(f => f.id == e.target.id);
-            if (localField) {
-                vm.$emit('line-event', e, localField);
+            const localField = vm.data.lines?.find(f => f.id == e.target.id);
+            if (localField && vm.editLineTable) {
+                vm.editLineTable(e, localField);
             }
         }
     });
@@ -78,11 +76,13 @@ export default function(vm, editor) {
             });
         }
     });
+
+    editor.on('preview', (e) => vm.$emit('preview', e));
 }
 
 
 function availableField(vm, $) {
-    for (let index = 0, fields = [...vm.fieldInfo.fields, ...(vm.fieldInfo.lines||[])]; 
+    for (let index = 0, fields = [...vm.data.main.fields, ...(vm.data.lines||[])];
             index < fields.length; index++) {
         const field = fields[index];
         const disabled = !(field.id && $('#' + field.id).length == 0);
