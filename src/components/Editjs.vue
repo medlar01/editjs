@@ -50,9 +50,9 @@
 import Tinymce from './Tinymce.vue'
 import EditLine from './EditLine.vue'
 import ErdMaker from 'element-resize-detector'
-import { constTableTpl } from './const'
+import { constTableTpl } from './config'
 import plugin, { unique } from './plugin'
-
+import conversions from './conversion'
 export default {
     components: {
         Tinymce,
@@ -72,6 +72,12 @@ export default {
                 return []
             }
         },
+        conversions: {
+            type: Array,
+            default() {
+                return []
+            }
+        }
     },
 
     data() {
@@ -96,6 +102,7 @@ export default {
     created() {
         const vm = this;
         this.plugins.push(plugin);
+        conversions.map(conversion => this.conversions.push(conversion));
         this.config['setup'] = function(editor) {
             const plugins = vm.plugins;
             for (let index = 0; index < plugins.length; index++) {
@@ -228,26 +235,16 @@ export default {
         },
 
         preview(event) {
-            const data = {};
-            const body = event.target.dom.create('body', {}, event.content);
+            const ctx = {};
+            const conversions = this.conversions;
             const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
-            const fieldNodes = DOMUtils.DOM.$('.mce-field', body);
-            fieldNodes.each(function(idx, n) {
-                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': n.id });
-                (n.parentElement || n.parentNode).replaceChild(input, n);
-                data[n.id] = null;
-            });
-            const tableNodes = DOMUtils.DOM.$('.mce-table-line', body);
-            tableNodes.each(function(idx, n) {
-                const div = event.target.dom.create('div', {}, n.innerHTML);
-                (n.parentElement || n.parentNode).replaceChild(div, n);
-            });
-            const content = body.innerHTML;
-            body.innerHTML = '';
+            conversions.map(conversion => conversion(this, event, ctx));
+            const content = ctx['body'].innerHTML;
+            ctx['body'].innerHTML = '';
             const div = DOMUtils.DOM.create('div', {id: 'app'});
-            body.appendChild(div);
+            ctx['body'].appendChild(div);
             const vue = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/vue@2'});
-            body.appendChild(vue);
+            ctx['body'].appendChild(vue);
             const script = DOMUtils.DOM.create('script', {type: "text/javascript"}, `
                 (function() {
                     const win = window.parent;
@@ -258,22 +255,19 @@ export default {
                     button.classList.add('tox-button');
                     button.innerText = '获取数据';
                     footer.appendChild(button);
-                    console.log('footer', footer);
                     button.onclick = function() {
                         win.alert(JSON.stringify(vue.$data));
                     }
 
                     const vue = new Vue({
                         el: '#app',
-                        data: ${JSON.stringify(data)},
+                        data: ${JSON.stringify(ctx['data'])},
                         template: \`<div>${content}</div>\`
                     });
-                    console.log('this is new Vue instance!', vue);
                 })();
             `);
-            body.appendChild(script);
-            event.content = body.innerHTML;
-            console.log('preview', event, body);
+            ctx['body'].appendChild(script);
+            event.content = ctx['body'].innerHTML;
         }
     }
 }
