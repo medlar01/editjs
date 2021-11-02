@@ -90,13 +90,13 @@ export default {
             const element = selection.getNode();
             if (element.nodeName != 'TD') {
                 const edi = tmceInstance.getEditor();
-                edi.notificationManager.open({text: '请在表格行内插入数据键', type: 'error'});
+                edi.notificationManager.open({text: '请在表格第' + g_findFieldRow(element) + '行内插入数据键', type: 'error'});
                 return;
             }
             const parent = element.parentElement || element.parentNode;
             if (!(parent && parent.classList.contains('line_field_row'))) {
                 const edi = tmceInstance.getEditor();
-                edi.notificationManager.open({text: '请在表格行内插入数据键', type: 'error'});
+                edi.notificationManager.open({text: '请在表格第' + g_findFieldRow(element) + '行内插入数据键', type: 'error'});
                 return;
             }
             const { DOM } = g_resolve('tinymce.dom.DOMUtils');
@@ -130,19 +130,44 @@ function g_resolve(ctx, editor) {
     return window['tinyMCE'].resolve(ctx, editor);
 }
 
+function findParent(element, name) {
+    if (element && element.nodeName == name) {
+        return element;
+    }
+    while (element != null && element.nodeName != name && element.nodeName != 'BODY') {
+        element = element.parentElement || element.parentNode;
+    }
+    return element ? element.nodeName == name ? element : null : null;
+}
+
+function g_findFieldRow(element) {
+    element = findParent(element, 'TABLE');
+    let row = 0;
+    if (!element) {
+        return -1;
+    }
+    const trs = element.querySelectorAll('tr');
+    for (const key in trs) {
+        const tr = trs[key];
+        row ++;
+        if (tr.classList && tr.classList.contains('line_field_row')) {
+            return row;
+        }
+    }
+    return -1;
+}
+
 function g_plugin(vm, editor) {
     editor.on('load', function() {
         if (editor.hasPlugin('table')) {
             const cached = g_regConfig(editor);
-            const keys = ['tableinsertrowbefore', 'tableinsertrowafter', 'tabledeleterow', 'tablecutrow', 'tablecopyrow'];
+            const keys = ['tabledeleterow', 'tablecutrow', 'tablecopyrow'];
             g_rewriteMenuItem(cached.menuItems, keys, function(overwrite, api) {
                 const { tmceInstance } = vm.$refs;
                 const selection = tmceInstance.getSelection();
                 let element = selection.getNode();
-                if (element.nodeName == 'BR') {
-                    element = element.parentElement || element.parentNode;
-                }
-                if (element.nodeName != 'TD') {
+                element = findParent(element, 'TD');
+                if (!element) {
                     overwrite(api);
                     return;
                 }
@@ -160,7 +185,33 @@ function g_plugin(vm, editor) {
         }
     });
 
-    
+    function changeEvents(edr, bindings, removed) {
+        for (let index = 0; index < bindings.length; index++) {
+            const binding = bindings[index];
+            const events = edr.bindings[binding];
+
+            for (let index = 0; index < events.length; index++) {
+                const event = events[index];
+                event.removed = removed;
+            }
+        }
+    }
+
+    editor.on('ObjectSelected', function() {
+        setTimeout(function() {
+            const node = editor.selection.getNode();
+            const removed = containClass(node, 'mce-field');
+            changeEvents(editor.getEventDispatcher(), ['mousemove'], removed);
+        });
+    });
+
+    // editor.on('Winopen', function(event) {
+    //     console.log("winopen", event);
+    //     if (event.args.title == 'Row Properties') {
+    //         const tds = event.target.dom.$('.line_field_row td[data-mce-selected]');
+    //         event.args.body.tabs[0].items[0].disabled = tds.length > 0;
+    //     }
+    // });
 }
 
 function g_regConfig(edi) {
@@ -179,6 +230,10 @@ function g_rewriteMenuItem(menuItems, keys, callback) {
             }
         }
     });
+}
+
+function containClass(node, clazz) {
+    return (node&& node.classList && node.classList.contains(clazz));
 }
 </script>
 
