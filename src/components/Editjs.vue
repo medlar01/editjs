@@ -102,6 +102,7 @@ export default {
     created() {
         const vm = this;
         this.plugins.push(plugin);
+        this.plugins.push(function(_, edi) { edi.on('preview', (e) => vm.preview(e)) });
         conversions.map(conversion => this.conversions.push(conversion));
         this.config['setup'] = function(editor) {
             const plugins = vm.plugins;

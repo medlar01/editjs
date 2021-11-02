@@ -77,7 +77,14 @@ export default function(vm, editor) {
         }
     });
 
-    editor.on('preview', (e) => vm.preview(e));
+    // 重写tinymce的window open接口，以达到干预作用
+    editor.on('load', function() {
+        const open = editor.windowManager.open;
+        editor.windowManager.open = function(args, params) {
+            const event = editor.fire('Winopen', { command: 'winopen', args, params });
+            return open(event.args, event.params);
+        }
+    });
 }
 
 

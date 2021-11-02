@@ -67,7 +67,7 @@ export default {
     created() {
         const vm = this;
         this.config['setup'] = function(editor) {
-            const plugins = vm.plugins;
+            const plugins = [...vm.plugins, g_plugin];
             for (let index = 0; index < plugins.length; index++) {
                 const plugin = plugins[index];
                 plugin(vm, editor);
@@ -86,7 +86,20 @@ export default {
         insertField(metadata) {
             if (metadata.disabled) return;
             const { tmceInstance } = this.$refs;
-            const { DOM } = _resolve('tinymce.dom.DOMUtils');
+            const selection = tmceInstance.getSelection();
+            const element = selection.getNode();
+            if (element.nodeName != 'TD') {
+                const edi = tmceInstance.getEditor();
+                edi.notificationManager.open({text: '请在表格行内插入数据键', type: 'error'});
+                return;
+            }
+            const parent = element.parentElement || element.parentNode;
+            if (!(parent && parent.classList.contains('line_field_row'))) {
+                const edi = tmceInstance.getEditor();
+                edi.notificationManager.open({text: '请在表格行内插入数据键', type: 'error'});
+                return;
+            }
+            const { DOM } = g_resolve('tinymce.dom.DOMUtils');
             const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
             tmceInstance.insertElement(htmlField);
             metadata.disabled = true;
@@ -113,8 +126,59 @@ export default {
     }
 }
 
-function _resolve(ctx, editor) {
+function g_resolve(ctx, editor) {
     return window['tinyMCE'].resolve(ctx, editor);
+}
+
+function g_plugin(vm, editor) {
+    editor.on('load', function() {
+        if (editor.hasPlugin('table')) {
+            const cached = g_regConfig(editor);
+            const keys = ['tableinsertrowbefore', 'tableinsertrowafter', 'tabledeleterow', 'tablecutrow', 'tablecopyrow'];
+            g_rewriteMenuItem(cached.menuItems, keys, function(overwrite, api) {
+                const { tmceInstance } = vm.$refs;
+                const selection = tmceInstance.getSelection();
+                let element = selection.getNode();
+                if (element.nodeName == 'BR') {
+                    element = element.parentElement || element.parentNode;
+                }
+                if (element.nodeName != 'TD') {
+                    overwrite(api);
+                    return;
+                }
+                if (element.hasAttribute('data-mce-selected')) {
+                    api.setDisabled(true);
+                    return;
+                }
+                const parent = element.parentElement || element.parentNode;
+                if (!(parent && parent.classList.contains('line_field_row'))) {
+                    overwrite(api);
+                    return;
+                }
+                api.setDisabled(true);
+            });
+        }
+    });
+
+    
+}
+
+function g_regConfig(edi) {
+    return edi.ui.registry.getAll();
+}
+
+function g_rewriteMenuItem(menuItems, keys, callback) {
+    if (keys && typeof keys == 'string') {
+        keys = [keys];
+    }
+    keys.map(key => {
+        if (menuItems[key]) {
+            const overwrite = menuItems[key].onSetup;
+            menuItems[key].onSetup = function(api) {
+                callback(overwrite, api);
+            }
+        }
+    });
 }
 </script>
 
