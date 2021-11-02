@@ -22,7 +22,7 @@ export default function(vm, editor) {
             clearInterval(timer);
             return;
         }
-        availableField(vm, (s) => editor.dom.$(s, editor.getBody()));
+        availableField(vm, (s) => editor.dom?.$(s, editor.getBody()));
     }, 1000);
 
     editor.on('Cut Copy', function(e) {
@@ -77,7 +77,7 @@ export default function(vm, editor) {
         }
     });
 
-    editor.on('preview', (e) => vm.$emit('preview', e));
+    editor.on('preview', (e) => vm.preview(e));
 }
 
 
@@ -85,7 +85,7 @@ function availableField(vm, $) {
     for (let index = 0, fields = [...vm.data.main.fields, ...(vm.data.lines||[])];
             index < fields.length; index++) {
         const field = fields[index];
-        const disabled = !(field.id && $('#' + field.id).length == 0);
+        const disabled = !(field.id && $('#' + field.id)?.length == 0);
         field.disabled = disabled;
     }
 }
@@ -107,7 +107,8 @@ export function unique() {
         ret += parseInt(str.substr(index, 4)).toString(32);
         index += 4;
     }
-    return ret;
+    const hex = 'abcdefghijklmnopqrstuvwxyz';
+    return hex.charAt(Math.random() * 25) + ret;
 }
 
 

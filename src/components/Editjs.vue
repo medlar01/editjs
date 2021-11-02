@@ -189,6 +189,7 @@ export default {
                     const split = actTab.split('-');
                     const ref = this.$refs['editLine' + split[1]];
                     if (ref && ref.length > 0) {
+                        this.loading = true;
                         const result = ref[0].save();
                         ref[0].distory();
                         this.akey = 'tab-1';
@@ -198,7 +199,6 @@ export default {
                             this.tabs.splice(index, 1);
                             this.editLines.splice(index, 1);
                         }
-                        this.loading = true;
                         _syncLoading(this, () => {
                             this.insertLineTable(result.metadata, result.ctx);
                         });
@@ -224,24 +224,56 @@ export default {
             _syncLoading(this, () => {
                 const ref = self.$refs['editLine' + (4 + index)][0];
                 ref.setContent(ctx || constTableTpl);
-            })
+            });
         },
 
         preview(event) {
+            const data = {};
             const body = event.target.dom.create('body', {}, event.content);
-            console.log('preview', event, body);
             const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
             const fieldNodes = DOMUtils.DOM.$('.mce-field', body);
             fieldNodes.each(function(idx, n) {
-                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id });
+                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': n.id });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
+                data[n.id] = null;
             });
             const tableNodes = DOMUtils.DOM.$('.mce-table-line', body);
             tableNodes.each(function(idx, n) {
                 const div = event.target.dom.create('div', {}, n.innerHTML);
                 (n.parentElement || n.parentNode).replaceChild(div, n);
             });
+            const content = body.innerHTML;
+            body.innerHTML = '';
+            const div = DOMUtils.DOM.create('div', {id: 'app'});
+            body.appendChild(div);
+            const vue = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/vue@2'});
+            body.appendChild(vue);
+            const script = DOMUtils.DOM.create('script', {type: "text/javascript"}, `
+                (function() {
+                    const win = window.parent;
+                    const doc = win.document;
+                    const footer = doc.querySelector("div[role='dialog'] .tox-dialog__footer-end");
+                    footer.querySelector('button').classList.add('tox-button--secondary');
+                    const button = doc.createElement('button');
+                    button.classList.add('tox-button');
+                    button.innerText = '获取数据';
+                    footer.appendChild(button);
+                    console.log('footer', footer);
+                    button.onclick = function() {
+                        win.alert(JSON.stringify(vue.$data));
+                    }
+
+                    const vue = new Vue({
+                        el: '#app',
+                        data: ${JSON.stringify(data)},
+                        template: \`<div>${content}</div>\`
+                    });
+                    console.log('this is new Vue instance!', vue);
+                })();
+            `);
+            body.appendChild(script);
             event.content = body.innerHTML;
+            console.log('preview', event, body);
         }
     }
 }
