@@ -30,7 +30,7 @@
                 </a-layout>
             </a-tab-pane>
             <a-tab-pane key="tab-2" tab="表单设置">
-                Content of Tab Pane 2
+                <FormSetting :data="data" />
             </a-tab-pane>
             <a-tab-pane key="tab-3" tab="行为设置">
                 Content of Tab Pane 3
@@ -49,6 +49,7 @@
 <script>
 import Tinymce from './Tinymce.vue'
 import EditLine from './EditLine.vue'
+import FormSetting from './FormSetting.vue'
 import ErdMaker from 'element-resize-detector'
 import { constTableTpl } from './config'
 import plugin, { unique } from './plugin'
@@ -56,7 +57,8 @@ import conversions from './conversion'
 export default {
     components: {
         Tinymce,
-        EditLine
+        EditLine,
+        FormSetting
     },
 
     props: {
