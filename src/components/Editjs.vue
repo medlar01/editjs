@@ -33,7 +33,7 @@
                 <FormSetting :data="data" />
             </a-tab-pane>
             <a-tab-pane key="tab-3" tab="行为设置">
-                Content of Tab Pane 3
+                <BehaviorSetting />
             </a-tab-pane>
             <a-tab-pane v-for="(title, idx) in tabs" :key="'tab-' + (4 + idx)">
                 <span slot="tab">
@@ -50,6 +50,7 @@
 import Tinymce from './Tinymce.vue'
 import EditLine from './EditLine.vue'
 import FormSetting from './FormSetting.vue'
+import BehaviorSetting from './BehaviorSetting.vue'
 import ErdMaker from 'element-resize-detector'
 import { constTableTpl } from './config'
 import plugin, { unique } from './plugin'
@@ -58,7 +59,8 @@ export default {
     components: {
         Tinymce,
         EditLine,
-        FormSetting
+        FormSetting,
+        BehaviorSetting
     },
 
     props: {

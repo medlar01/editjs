@@ -100,7 +100,7 @@ export default {
                     customRender: (val, row) => {
                         return (<EditableCell value={val} onEdit={(value) =>  row.category = value} />);
                     }
-                }
+                }, {}
             ],
             tableData: {}
         }
