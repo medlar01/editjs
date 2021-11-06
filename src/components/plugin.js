@@ -18,7 +18,7 @@ export default function(vm, editor) {
         availableField(vm, (s) => editor.dom.$(s, editor.getBody()));
     });
     const timer = setInterval(() => {
-        if (editor.settings.distory) {
+        if (editor.settings.destroy) {
             clearInterval(timer);
             return;
         }
@@ -81,7 +81,8 @@ export default function(vm, editor) {
     editor.on('load', function() {
         const open = editor.windowManager.open;
         editor.windowManager.open = function(args, params) {
-            const event = editor.fire('Winopen', { command: 'winopen', target: editor, args, params });
+            const event = editor.fire('Winopen', { command: 'winopen', args, params });
+            console.log('winopen', event);
             return open(event.args, event.params);
         }
     });
@@ -123,7 +124,7 @@ function containClass(node, clazz) {
     return (node&& node.classList && node.classList.contains(clazz));
 }
 
-const fn = function() {}
+
 const cacheLimits = {};
 // 限流，只执行最后一次的请求
 function limit(key, millis, callback) {
@@ -147,13 +148,13 @@ function limit(key, millis, callback) {
 const cacheOnces = {};
 // 限流，只执行第一次
 function once(key, millis, callback) {
-    if (!cacheLimits[key]) {
-        cacheLimits[key] = Date.now();
+    if (!cacheOnces[key]) {
+        cacheOnces[key] = Date.now();
         callback();
         return;
     }
     const nMillis = Date.now();
-    if (nMillis - millis >= cacheLimits[key]) {
+    if (nMillis - millis >= cacheOnces[key]) {
         callback();
     }
 }

@@ -18,6 +18,7 @@ export default {
                 return 'vue-tinymce-' + Date.now() + ((Math.random() * 1000).toFixed(0) + '');
             }
         },
+        lang: String,
         config: {
             type: Object,
             default() {
@@ -70,6 +71,7 @@ export default {
 
         distory() {
             (_tinymce().get(this.tinymceId) || this.editor).destroy();
+            this.editor.settings.destroy = true;
         },
     }
 }
