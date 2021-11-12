@@ -1,6 +1,6 @@
 <template>
     <a-layout class="form-setting">
-        <a-layout-sider>
+        <a-layout-sider :width="260">
             <a-menu @select="onSelectMenu" mode="inline" :default-selected-keys="['main']">
                 <a-menu-item key="main" :title="'主表：' + data.main.table_comment">
                     <a-icon type="desktop" />

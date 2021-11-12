@@ -25,7 +25,7 @@
                     </a-layout-sider>
                     <a-layout-content>
                         <Tinymce lang="zh_CN" @preview="preview" @init-event="loading = false" :config="config" :plugins="plugins" 
-                            :field-info="{...data.main, lines: data.lines }" ref="tmceInstance" />
+                            :field-info="{...data.main, lines: data.lines }" ref="tmceInstance" :value="content" />
                     </a-layout-content>
                 </a-layout>
             </a-tab-pane>
@@ -33,7 +33,7 @@
                 <FormSetting :data="data" />
             </a-tab-pane>
             <a-tab-pane key="tab-3" tab="行为设置">
-                <BehaviorSetting />
+                <BehaviorSetting :events="events" />
             </a-tab-pane>
             <a-tab-pane v-for="(title, idx) in tabs" :key="'tab-' + (4 + idx)">
                 <span slot="tab">
@@ -68,6 +68,16 @@ export default {
             type: Object,
             default() {
                 return {}
+            }
+        },
+        content: {
+            type: String,
+            default: ''
+        },
+        events: {
+            type: Array,
+            default() {
+                return []
             }
         },
         plugins: {
@@ -105,8 +115,8 @@ export default {
 
     created() {
         const vm = this;
-        this.plugins.push(plugin);
-        this.plugins.push(function(_, edi) { edi.on('preview', (e) => vm.preview(e)) });
+        [plugin, (_, edi) => edi.on('preview', (e) => vm.preview(e)), _plugin]
+            .map(it => this.plugins.push(it));
         conversions.map(conversion => this.conversions.push(conversion));
         this.config['setup'] = function(editor) {
             const plugins = vm.plugins;
@@ -117,19 +127,18 @@ export default {
         }
         
         const main = this.data.main.fields;
+        function $set(el) {
+            if (!el.id) vm.$set(el, 'id', unique());
+            vm.$set(el, 'disabled', false);
+        }
         for (let index = 0; index < main.length; index++) {
-            const element = main[index];
-            this.$set(element, 'id', unique());
-            this.$set(element, 'disabled', false);
+            $set(main[index]);
         }
         const lines = this.data.lines;
         for (let index = 0; index < lines.length; index++) {
-            this.$set(lines[index], 'id', unique());
-            this.$set(lines[index], 'disabled', false);
+            $set(lines[index]);
             for (let idx = 0; idx < lines[index].fields.length; idx++) {
-                const element = lines[index].fields[idx];
-                this.$set(element, 'id', unique());
-                this.$set(element, 'disabled', false);
+                $set(lines[index].fields[idx]);
             }
         }
     },
@@ -250,31 +259,46 @@ export default {
             ctx['body'].appendChild(div);
             const vue = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/vue@2'});
             ctx['body'].appendChild(vue);
+            const metds = ctx['methods'];
             const script = DOMUtils.DOM.create('script', {type: "text/javascript"}, `
                 (function() {
                     const win = window.parent;
                     const doc = win.document;
-                    const footer = doc.querySelector("div[role='dialog'] .tox-dialog__footer-end");
-                    footer.querySelector('button').classList.add('tox-button--secondary');
-                    const button = doc.createElement('button');
-                    button.classList.add('tox-button');
-                    button.innerText = '获取数据';
-                    footer.appendChild(button);
-                    button.onclick = function() {
-                        win.alert(JSON.stringify(vue.$data));
-                    }
-
                     const vue = new Vue({
                         el: '#app',
                         data: ${JSON.stringify(ctx['data'])},
-                        template: \`<div>${content}</div>\`
+                        template: \`<div>${content}</div>\`,
+                        methods: {
+                            ${Object.keys(metds).map(key => key + metds[key] + ',')}
+                        }
                     });
+                    win.__preview__ = { vue };
                 })();
             `);
             ctx['body'].appendChild(script);
             event.content = ctx['body'].innerHTML;
+            console.log('vue 代码块:', script.innerHTML);
         }
     }
+}
+
+function _plugin(vm, edi) {
+    edi.on('winopen', (event) => {
+        if (event.args.title == 'Preview') {
+            const { buttons } = event.args;
+            buttons[0].primary = false;
+            buttons.push({
+                name: "获取数据",
+                primary: true,
+                text: "获取数据",
+                type: "submit"
+            });
+            event.args.onSubmit = (api) => {
+                alert(JSON.stringify(window['__preview__'].vue.$data.formData));
+                api.close();
+            }
+        }
+    });
 }
 
 function _syncLoading(self, callback) {

@@ -26,6 +26,7 @@ export default function(vm) {
         toolbar_mode: 'sliding',
         force_br_newlines: false,
         force_p_newlines: false,
+        draggable_modal: true,
         forced_root_block: vm.block,
         visualblocks_default_state: true,
         resize: false,

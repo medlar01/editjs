@@ -82,7 +82,6 @@ export default function(vm, editor) {
         const open = editor.windowManager.open;
         editor.windowManager.open = function(args, params) {
             const event = editor.fire('Winopen', { command: 'winopen', args, params });
-            console.log('winopen', event);
             return open(event.args, event.params);
         }
     });

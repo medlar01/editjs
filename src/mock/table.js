@@ -14,8 +14,9 @@ export default function() {
                 {
                     name: 'employee_code',
                     comment: '员工工号',
-                    category: 'input',
-                    editable: true
+                    category: 'dialog',
+                    editable: true,
+                    id: 'f1j47a194g2h'
                 },
                 {
                     name: 'employee_name',
@@ -26,7 +27,7 @@ export default function() {
                 {
                     name: 'department_code',
                     comment: '部门编码',
-                    category: 'input',
+                    category: 'dialog',
                     editable: false
                 },
                 {
@@ -45,6 +46,12 @@ export default function() {
                     name: 'recv_date',
                     comment: '领用日期',
                     category: 'date',
+                    editable: false
+                },
+                {
+                    name: 'remark',
+                    comment: '备注信息',
+                    category: 'textarea',
                     editable: false
                 }
             ]
