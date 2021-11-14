@@ -22,7 +22,8 @@ export default function() {
                     name: 'employee_name',
                     comment: '员工姓名',
                     category: 'input',
-                    editable: true
+                    editable: true,
+                    id: 'l1j47al23q1j'
                 },
                 {
                     name: 'department_code',

@@ -1,7 +1,7 @@
 export default [
     function (vm, event, ctx) { // 转换field
         ctx['data'] = {};
-        ctx['body'] = event.target.dom.create('body', {}, event.content);
+        ctx['body'] = event.target.dom.create('pre', {}, vm.content);
         const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-field', ctx['body']);
         if (!ctx['data'].formData) {
@@ -33,24 +33,24 @@ export default [
                 mtds[key] =  `() { ${conv(ev)} }`;
             });
             const block = ctx['body'].querySelector('#' + evt.field.id);
-            objEach(evts, (el, key) => {
-                block.setAttribute(`v-on:${key}`, `() => { ${el.join(';')} }`);
-            });
+            if (block) {
+                objEach(evts, (el, key) => {
+                    block.setAttribute(`v-on:${key}`, `() => { ${el.join(';')} }`);
+                });
+            }
         });
         console.log('vm.events', vm.events, ctx);
     }
 ]
 
 function objEach(obj, callback) {
-    Object.keys(obj).forEach(_ => callback(obj[_], _));
+    Object.keys(obj).forEach(i => callback(obj[i], i));
 }
 
 function conv(ev) {
-    console.log('conv', ev);
     switch(ev.bus) {
         case 'default': {
             return ev.action.map(it => `this.formData.${it.id} = ${it.exec}`)
-            // return `this.formData.l1j47al23q1j = 'Hello'`;
         }
     }
 }

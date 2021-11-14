@@ -45,7 +45,7 @@ export default {
     },
     mixins: [mixins],
     created() {
-        _load('https://cdn.jsdelivr.net/gh/medlar01/tinymce-cdn@5.9.2.1/tinymce.js',
+        _load('https://cdn.jsdelivr.net/gh/medlar01/tinymce-cdn@5.9.2.2/tinymce.js',
             (err) => {
                 if (err) throw err;
                 if (_tinymce().get(this.tinymceId)) {

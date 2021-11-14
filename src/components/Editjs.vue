@@ -52,6 +52,9 @@ import EditLine from './EditLine.vue'
 import FormSetting from './FormSetting.vue'
 import BehaviorSetting from './BehaviorSetting.vue'
 import ErdMaker from 'element-resize-detector'
+import prettier from 'prettier'
+import parserHtml from 'prettier/parser-html'
+import parserBabel from 'prettier/parser-babel'
 import { constTableTpl } from './config'
 import plugin, { unique } from './plugin'
 import conversions from './conversion'
@@ -264,6 +267,12 @@ export default {
                 (function() {
                     const win = window.parent;
                     const doc = win.document;
+                    const page = doc.querySelector('div[role="dialog"] .tox-dialog__body-content');
+                    page.style.height = '557px';
+                    setInterval(() => {
+                        page.style.height = '557px';
+                    }, 500);
+
                     const vue = new Vue({
                         el: '#app',
                         data: ${JSON.stringify(ctx['data'])},
@@ -277,7 +286,6 @@ export default {
             `);
             ctx['body'].appendChild(script);
             event.content = ctx['body'].innerHTML;
-            console.log('vue 代码块:', script.innerHTML);
         }
     }
 }
@@ -285,6 +293,7 @@ export default {
 function _plugin(vm, edi) {
     edi.on('winopen', (event) => {
         if (event.args.title == 'Preview') {
+            // 定制按钮
             const { buttons } = event.args;
             buttons[0].primary = false;
             buttons.push({
@@ -297,6 +306,106 @@ function _plugin(vm, edi) {
                 alert(JSON.stringify(window['__preview__'].vue.$data.formData));
                 api.close();
             }
+            event.args.size = "large"
+
+            // 重定义布局
+            const items = event.args.body.items;
+            const tabs = [
+                {
+                    items,
+                    name: 'page',
+                    title: '页面'
+                },
+                {
+                    items: [
+                        {
+                            name: 'code',
+                            sandboxed: false,
+                            type: 'iframe'
+                        }
+                    ],
+                    name: 'code',
+                    title: '代码'
+                }
+            ];
+            event.args.body = {
+                tabs,
+                type: "tabpanel"
+            }
+            const ctx = {};
+            const conversions = vm.conversions;
+            conversions.map(conversion => conversion(vm, event, ctx));
+            const content = ctx['body'].innerHTML;
+            const metds = ctx['methods'];
+            const html = prettier.format(`<template>${content}</template><script>export default {data() { return ${JSON.stringify(ctx['data'], null, 4)} }, methods: { ${Object.keys(metds).map(key => key + metds[key] + ',')} }}</` + 'script>', {
+                parser: 'vue',
+                plugins: [parserHtml, parserBabel],
+                "arrowParens": "always",
+                "bracketSameLine": false,
+                "bracketSpacing": true,
+                "embeddedLanguageFormatting": "auto",
+                "htmlWhitespaceSensitivity": "css",
+                "insertPragma": false,
+                "jsxSingleQuote": false,
+                "printWidth": 80,
+                "proseWrap": "preserve",
+                "quoteProps": "as-needed",
+                "requirePragma": false,
+                "semi": true,
+                "singleQuote": false,
+                "tabWidth": 2,
+                "trailingComma": "es5",
+                "useTabs": false,
+                "vueIndentScriptAndStyle": false
+            }).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            event.args.initialData.code = 
+            '<!DOCTYPE html>' +
+            '<html>' +
+            '<head>' +
+            '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/styles/atom-one-dark.min.css">' +
+            '<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js"><' +'/script>' +
+            '<script src="https://cdn.jsdelivr.net/npm/vue@2"><' + '/script>' +
+            '<style>' +
+            `
+                html,body {
+                    height: calc(100% - 21px);
+                }
+                #intro,pre,pre > code {
+                    height: 100%;
+                }
+                pre > code {
+                    white-space: pre;
+                    font-family: 'Courier New';
+                    font-size: 13px;
+                    border: 1px solid #d7c9c9;
+                    padding: 2px;
+                    overflow: auto;
+                }
+            ` +
+            '</style>' +
+            '</head>' +
+            '<body id="tinymce" class="mce-content-body ">' +
+            '<div id="intro">' + 
+            '<pre><code class="language-html" v-html="text"></code></pre>' +
+            '</div>' +
+            '<script type="text/javascript">' +
+            `
+                (function() {
+                    new Vue({
+                        el: '#intro',
+                        data: {
+                            text: \`${html}\`
+                        },
+                        mounted() {
+                            const el = this.$el.querySelector('pre code');
+                            hljs.highlightElement(el);
+                        }
+                    });
+                })()
+            ` +
+            '<' + '/script>' +
+            '</body>' +
+            '</html>';
         }
     });
 }
