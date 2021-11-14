@@ -33,7 +33,7 @@
                 <FormSetting :data="data" />
             </a-tab-pane>
             <a-tab-pane key="tab-3" tab="行为设置">
-                <BehaviorSetting :events="events" />
+                <BehaviorSetting :events="events" :field-data="data" />
             </a-tab-pane>
             <a-tab-pane v-for="(title, idx) in tabs" :key="'tab-' + (4 + idx)">
                 <span slot="tab">
@@ -50,7 +50,7 @@
 import Tinymce from './Tinymce.vue'
 import EditLine from './EditLine.vue'
 import FormSetting from './FormSetting.vue'
-import BehaviorSetting from './BehaviorSetting.vue'
+import BehaviorSetting from './behavior'
 import ErdMaker from 'element-resize-detector'
 import prettier from 'prettier'
 import parserHtml from 'prettier/parser-html'

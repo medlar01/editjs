@@ -22,7 +22,10 @@ const events = [
                     {
                         id: 'l1j47al23q1j',
                         comment: '员工姓名/EMPLOYEE_NAME',
-                        exec: null
+                        exec: {
+                            type: 'Empty',
+                            value: null
+                        }
                     }
                 ]
             }

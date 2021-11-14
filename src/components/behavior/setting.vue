@@ -9,41 +9,41 @@
             </a-menu>
             <div class="toolbar">
                 <a-button type="dashed" shape="round" size="small" icon="edit">
-                    创建
+                    新增行为
                 </a-button>
             </div>
         </a-layout-sider>
         <a-layout-content style="padding: 20px">
-            <a-card v-for="(item, key) in currEvent.events" :title="'事件：' + key" size="small" type="inner" :key="key">
-                <a slot="extra" href="#"><a-icon type="close" /></a>
-                <a-descriptions v-for="(action, index) in item.action" bordered size="small" :key="index" style="margin-bottom: 10px">
-                    <a-descriptions-item label="行为字段">
-                        {{action.comment}}
-                    </a-descriptions-item>
-                    <a-descriptions-item label="执行动作">
-                        {{action.exec}}
-                    </a-descriptions-item>
-                    <a-descriptions-item label="编辑">
-                        <a-button shape="round" type="dashed" icon="edit" size="small" />
-                    </a-descriptions-item>
-                </a-descriptions>
-                <a-button style="float: right" type="dashed" shape="round" size="small" icon="edit">
-                    添加
-                </a-button>
+            <a-card v-for="(item, key) in currEvent.events" :title="'事件：' + key" size="small" type="inner" :key="key" style="margin-bottom: 10px">
+                <a slot="extra" href="#" @click="$delete(currEvent.events, key)"><a-icon type="close" /></a>
+                <Def :actions="item.action" :field-data="fieldData" />
             </a-card>
+            <div style="text-align: center">
+                <a-button style="width: 150px" type="dashed" shape="round" size="small" icon="edit">
+                    添加事件
+                </a-button>
+            </div>
         </a-layout-content>
+
+        <!-- 行为字段选择 -->
+        
     </a-layout>
 </template>
 
 <script>
+import Def from './Def.vue'
 export default {
+    components: {
+        Def
+    },
     props: {
         events: {
             type: Array,
             default() {
                 return []
             }
-        }
+        },
+        fieldData: Object
     },
     data() {
         return {
@@ -57,7 +57,7 @@ export default {
     methods: {
         onSelectMenu({item, key}) {
             this.currEvent = this.events[key];
-        }
+        },
     }
 }
 </script>
@@ -68,7 +68,7 @@ export default {
         margin: 10px 5px;
         text-align: center;
         > button {
-            width: 100px;
+            width: 150px;
         }
     }
 }

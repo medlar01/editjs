@@ -61,7 +61,8 @@ function objEach(obj, callback) {
 function conv(ev) {
     switch(ev.bus) {
         case 'default': {
-            return ev.action.map(it => `this.formData.${it.id} = ${it.exec}`)
+            return ev.action.map(it => `this.formData.${it.id} = '${it.exec.value == null ? "" : it.exec.value}'`)
+                .join(';');
         }
     }
 }
