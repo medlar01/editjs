@@ -294,6 +294,7 @@ function _plugin(vm, edi) {
     edi.on('winopen', (event) => {
         if (event.args.title == 'Preview') {
             // 定制按钮
+            event.content = edi.getBody().innerHTML;
             const { buttons } = event.args;
             buttons[0].primary = false;
             buttons.push({
@@ -357,11 +358,14 @@ function _plugin(vm, edi) {
                 "trailingComma": "es5",
                 "useTabs": false,
                 "vueIndentScriptAndStyle": false
-            }).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }).replace(/\n/g, '\\n').replace(/</g, '&lt;');
+            console.log('code', html);
             event.args.initialData.code = 
             '<!DOCTYPE html>' +
             '<html>' +
             '<head>' +
+            '<meta http-equiv="X-UA-Compatible" content="IE=edge">' +
+            '<meta name="viewport" content="width=device-width,initial-scale=1.0">' +
             '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/styles/atom-one-dark.min.css">' +
             '<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js"><' +'/script>' +
             '<script src="https://cdn.jsdelivr.net/npm/vue@2"><' + '/script>' +
@@ -386,7 +390,7 @@ function _plugin(vm, edi) {
             '</head>' +
             '<body id="tinymce" class="mce-content-body ">' +
             '<div id="intro">' + 
-            '<pre><code class="language-html" v-html="text"></code></pre>' +
+            '<pre><code class="language-html" v-html="text" /></pre>' +
             '</div>' +
             '<script type="text/javascript">' +
             `

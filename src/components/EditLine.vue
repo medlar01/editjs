@@ -100,7 +100,7 @@ export default {
                 return;
             }
             const { DOM } = g_resolve('tinymce.dom.DOMUtils');
-            const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
+            const htmlField = DOM.create('span', { class: 'unedit mce-field tl', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
             tmceInstance.insertElement(htmlField);
             metadata.disabled = true;
             tmceInstance.focus();
