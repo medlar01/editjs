@@ -7,13 +7,18 @@ export default [
         if (!ctx['data'].formData) {
             ctx['data'].formData = {};
         }
+        
+        const cacheFields = {};
+        [...vm.data.main.fields, ...[].concat(...vm.data.lines.map(it => it.fields))]
+            .forEach(it => cacheFields[it.id] = it);
+        ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
             if (!n.classList.contains('tl')) {
-                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': `formData.${n.id}` });
+                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': `formData.${cacheFields[n.id].name}` });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
-                ctx['data'].formData[n.id] = null;
+                ctx['data'].formData[cacheFields[n.id].name] = null;
             } else {
-                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': `item.${n.id}` });
+                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': `item.${cacheFields[n.id].name}` });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
             }
         });
@@ -40,8 +45,11 @@ export default [
         events.forEach(evt => {
             const evts = {};
             objEach(evt.events, (ev, key) => {
-                (evts[ev.type] = evts[ev.type] || []).push(key + '()');
-                mtds[key] =  `() { ${conv(ev)} }`;
+                const convString = conv(ctx, ev);
+                if (convString) {
+                    (evts[ev.type] = evts[ev.type] || []).push(key + '()');
+                    mtds[key] =  `() { ${convString} }`;
+                }
             });
             const block = ctx['body'].querySelector('#' + evt.field.id);
             if (block) {
@@ -50,7 +58,6 @@ export default [
                 });
             }
         });
-        console.log('vm.events', vm.events, ctx);
     }
 ]
 
@@ -58,11 +65,31 @@ function objEach(obj, callback) {
     Object.keys(obj).forEach(i => callback(obj[i], i));
 }
 
-function conv(ev) {
+function conv(ctx, ev) {
+    const cache = ctx['cacheFields'];
+    const formData = ctx['data'].formData;
     switch(ev.bus) {
         case 'default': {
-            return ev.action.map(it => `this.formData.${it.id} = '${it.exec.value == null ? "" : it.exec.value}'`)
-                .join(';');
+            return ev.action.map(it => {
+                if (!Object.keys(formData).includes(cache[it.id].name)) return null;
+                return `this.formData.${cache[it.id].name} = '${it.exec.value == null ? "" : it.exec.value}'`;
+            }).join(';');
         }
+        case 'script': {
+            return ev.action.map(it => {
+                switch(it.exec.type) {
+                    case "script": {
+                        return it.exec.value;
+                    }
+                    case "request": {
+                        return `this.axios.${it.exec.method}('${it.exec.url || "get"}')
+                            .then((res) => { ${it.exec.value} })
+                        `
+                    }
+                    default : return null;
+                }
+            }).join(';');
+        }
+        default: return null;
     }
 }

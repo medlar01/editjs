@@ -1,2 +1,2 @@
-import setting from './setting.vue'
-export default setting;
+import Setting from './Setting.vue'
+export default Setting;

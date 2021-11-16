@@ -24,7 +24,7 @@
                         </a-collapse>
                     </a-layout-sider>
                     <a-layout-content>
-                        <Tinymce lang="zh_CN" @preview="preview" @init-event="loading = false" :config="config" :plugins="plugins" 
+                        <Tinymce lang="zh_CN" @preview="preview" @init-event="loading = false" :config="config"
                             :field-info="{...data.main, lines: data.lines }" ref="tmceInstance" :value="content" />
                     </a-layout-content>
                 </a-layout>
@@ -104,7 +104,8 @@ export default {
             tabs: [],
             editLines: [],
             loading: true,
-            config: {}
+            config: {},
+            insidePlugins: [],
         }
     },
 
@@ -118,11 +119,10 @@ export default {
 
     created() {
         const vm = this;
-        [plugin, (_, edi) => edi.on('preview', (e) => vm.preview(e)), _plugin]
-            .map(it => this.plugins.push(it));
+        this.insidePlugins = this.insidePlugins.concat([...this.plugins, plugin, (_, edi) => edi.on('preview', (e) => vm.preview(e)), _plugin]);
         conversions.map(conversion => this.conversions.push(conversion));
         this.config['setup'] = function(editor) {
-            const plugins = vm.plugins;
+            const plugins = vm.insidePlugins;
             for (let index = 0; index < plugins.length; index++) {
                 const plugin = plugins[index];
                 plugin(vm, editor);
@@ -261,7 +261,9 @@ export default {
             const div = DOMUtils.DOM.create('div', {id: 'app'});
             ctx['body'].appendChild(div);
             const vue = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/vue@2'});
+            const axios = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js'});
             ctx['body'].appendChild(vue);
+            ctx['body'].appendChild(axios);
             const metds = ctx['methods'];
             const script = DOMUtils.DOM.create('script', {type: "text/javascript"}, `
                 (function() {
@@ -273,6 +275,7 @@ export default {
                         page.style.height = '557px';
                     }, 500);
 
+                    Vue.prototype.axios = axios;
                     const vue = new Vue({
                         el: '#app',
                         data: ${JSON.stringify(ctx['data'])},
@@ -311,6 +314,7 @@ function _plugin(vm, edi) {
 
             // 重定义布局
             const items = event.args.body.items;
+            items[0].sandboxed = false;
             const tabs = [
                 {
                     items,
@@ -359,7 +363,6 @@ function _plugin(vm, edi) {
                 "useTabs": false,
                 "vueIndentScriptAndStyle": false
             }).replace(/\n/g, '\\n').replace(/</g, '&lt;');
-            console.log('code', html);
             event.args.initialData.code = 
             '<!DOCTYPE html>' +
             '<html>' +
@@ -370,8 +373,7 @@ function _plugin(vm, edi) {
             '<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js"><' +'/script>' +
             '<script src="https://cdn.jsdelivr.net/npm/vue@2"><' + '/script>' +
             '<style>' +
-            `
-                html,body {
+            `  html,body {
                     height: calc(100% - 21px);
                 }
                 #intro,pre,pre > code {
@@ -384,8 +386,7 @@ function _plugin(vm, edi) {
                     border: 1px solid #d7c9c9;
                     padding: 2px;
                     overflow: auto;
-                }
-            ` +
+                }` +
             '</style>' +
             '</head>' +
             '<body id="tinymce" class="mce-content-body ">' +
@@ -393,8 +394,7 @@ function _plugin(vm, edi) {
             '<pre><code class="language-html" v-html="text" /></pre>' +
             '</div>' +
             '<script type="text/javascript">' +
-            `
-                (function() {
+            `   (function() {
                     new Vue({
                         el: '#intro',
                         data: {
@@ -405,8 +405,7 @@ function _plugin(vm, edi) {
                             hljs.highlightElement(el);
                         }
                     });
-                })()
-            ` +
+                })()` +
             '<' + '/script>' +
             '</body>' +
             '</html>';
