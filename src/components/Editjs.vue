@@ -281,7 +281,7 @@ export default {
                         data: ${JSON.stringify(ctx['data'])},
                         template: \`<div>${content}</div>\`,
                         methods: {
-                            ${Object.keys(metds).map(key => key + metds[key] + ',')}
+                            ${Object.keys(metds).map(key => key + metds[key] + ' ')}
                         }
                     });
                     win.__preview__ = { vue };
@@ -342,7 +342,7 @@ function _plugin(vm, edi) {
             conversions.map(conversion => conversion(vm, event, ctx));
             const content = ctx['body'].innerHTML;
             const metds = ctx['methods'];
-            const html = prettier.format(`<template>${content}</template><script>export default {data() { return ${JSON.stringify(ctx['data'], null, 4)} }, methods: { ${Object.keys(metds).map(key => key + metds[key] + ',')} }}</` + 'script>', {
+            const html = prettier.format(`<template>${content}</template><script>export default {data() { return ${JSON.stringify(ctx['data'], null, 4)} }, methods: { ${Object.keys(metds).map(key => key + metds[key] + ' ')} }}</` + 'script>', {
                 parser: 'vue',
                 plugins: [parserHtml, parserBabel],
                 "arrowParens": "always",
