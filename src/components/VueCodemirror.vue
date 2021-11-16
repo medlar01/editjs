@@ -1,5 +1,5 @@
 <template>
-    <codemirror
+    <codemirror class="vue-codemirror"
         v-model="innerCode"
         :options="options"
         @ready="(cm) => this.$emit('ready', cm)"
@@ -93,3 +93,9 @@ export default {
     },
 };
 </script>
+<style>
+.vue-codemirror > .CodeMirror {
+    font-family: "Courier New";
+    font-size: 12px;
+}
+</style>

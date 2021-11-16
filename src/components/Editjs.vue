@@ -119,7 +119,8 @@ export default {
 
     created() {
         const vm = this;
-        this.insidePlugins = this.insidePlugins.concat([...this.plugins, plugin, (_, edi) => edi.on('preview', (e) => vm.preview(e)), _plugin]);
+        this.plugins.push(plugin);
+        this.insidePlugins = this.insidePlugins.concat([...this.plugins, (_, edi) => edi.on('preview', (e) => vm.preview(e)), _plugin]);
         conversions.map(conversion => this.conversions.push(conversion));
         this.config['setup'] = function(editor) {
             const plugins = vm.insidePlugins;

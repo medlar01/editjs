@@ -4,12 +4,11 @@ export default [
         ctx['body'] = event.target.dom.create('body', {}, event.content);
         const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-field', ctx['body']);
-        if (!ctx['data'].formData) {
-            ctx['data'].formData = {};
-        }
+        if (!ctx['data'].formData) ctx['data'].formData = {};
         
         const cacheFields = {};
-        [...vm.data.main.fields, ...[].concat(...vm.data.lines.map(it => it.fields))]
+        [...vm.data.main.fields, ...[].concat(...vm.data.lines.map(it => it.fields), 
+            ...vm.data.lines.map(it => ({id: it.id, comment: it.table_comment, name: it.table_name})))]
             .forEach(it => cacheFields[it.id] = it);
         ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
@@ -18,7 +17,7 @@ export default [
                 (n.parentElement || n.parentNode).replaceChild(input, n);
                 ctx['data'].formData[cacheFields[n.id].name] = null;
             } else {
-                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': `item.${cacheFields[n.id].name}` });
+                const input = event.target.dom.create('input', { class: 'mce-field', ':id': `'${n.id}_' + idx`, 'v-model': `item.${cacheFields[n.id].name}` });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
             }
         });
@@ -27,13 +26,14 @@ export default [
     function (vm, event, ctx) { // 转换table line
         const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-table-line', ctx['body']);
+        const cacheFields = ctx['cacheFields'];
         blocks.each(function (idx, n) {
             const table = n.querySelector('table');
             table.id = n.id;
             const tr = table.querySelector('tr.line_field_row');
-            tr.setAttribute('v-for', `(item, idx) in formData.${n.id}`);
+            tr.setAttribute('v-for', `(item, idx) in formData.${cacheFields[n.id].name}`);
             tr.setAttribute(':key', `idx`);
-            ctx['data'].formData[n.id] = [{}];
+            ctx['data'].formData[cacheFields[n.id].name] = [{}];
             const div = event.target.dom.create('div', {}, n.innerHTML);
             (n.parentElement || n.parentNode).replaceChild(div, n);
         });
