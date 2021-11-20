@@ -265,7 +265,7 @@ export default {
             const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
             conversions.map(conversion => conversion(this, event, ctx));
             // 底部添加按钮
-            const gbtms = DOMUtils.DOM.create('div', {style: 'background-color: white; position: fixed; top: 497px; right: 0'});
+            const gbtms = DOMUtils.DOM.create('div', {style: 'background-color: #5857570d; position: fixed; top: 487px; right: 0; border-radius: 8px'});
             const btm1 = DOMUtils.DOM.create('a-button', {'v-on:click': 'printMode = false','v-show': 'printMode', type: 'link'}, '编辑模式');
             const btm2 = DOMUtils.DOM.create('a-button', {'v-on:click': 'printMode = true', 'v-show': '!printMode', type: 'link'}, '打印模式');
             const btm3 = DOMUtils.DOM.create('a-button', {'v-on:click': `() => {

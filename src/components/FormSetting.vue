@@ -2,6 +2,10 @@
     <a-layout class="form-setting">
         <a-layout-sider :width="260">
             <a-menu @select="onSelectMenu" mode="inline" :default-selected-keys="['main']">
+                <a-menu-item key="dialog" title="弹窗选项设置">
+                    <a-icon type="windows" />
+                    弹窗选项设置
+                </a-menu-item>
                 <a-menu-item key="main" :title="'主表：' + data.main.table_comment">
                     <a-icon type="desktop" />
                     主表：{{data.main.table_comment}}
@@ -22,7 +26,6 @@
 </template>
 
 <script>
-import { hasKey } from '@/utils/common'
 const nameMaps = { input: '文本', textarea: '文本域', number: '数值', date: '日期', select: '下拉', dialog: '弹窗' };
 const EditableCell = {
     render() {
@@ -66,9 +69,6 @@ const EditCell = {
                 break;
             }
             case "select": {
-                // if (!hasKey(this.row, 'options')) {
-                //     this.$set(this.row, 'options', null);
-                // }
                 slot = (<a-input size="small" style="width: 200px" v-model={this.row.options} placeholder="请输入选项，使用【,】分割"/>);
             }
         }

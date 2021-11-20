@@ -27,10 +27,11 @@ export function input() {
         },
         render() {
             const style = {
-                width: '200px'
+                width: '200px',
+                margin: '0 2px',
             };
             return this.options.printMode ?
-                (<div style={{ ...style, display: 'inline-block', 'vertical-align': 'top' }}>{this.mdata}</div>) :
+                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-input onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} />);
         }
     }
@@ -64,10 +65,12 @@ export function textarea() {
         render() {
             const style = {
                 width: '200px',
+                margin: '0 2px',
                 'vertical-align': 'top'
             };
             return this.options.printMode ?
-                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
+                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata?.split(/[\s\n]/).map(it => <div>{it}</div>)}</div>):
+                // (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-textarea onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} />);
         }
     }
@@ -101,7 +104,7 @@ export function select() {
         render() {
             const style = {
                 width: '200px',
-                'vertical-align': 'top'
+                margin: '0 2px',
             };
             const list = ['-'].concat(this.options.options?.split(',') || []);
             return this.options.printMode ?
@@ -141,7 +144,7 @@ export function date() {
         render() {
             const style = {
                 width: '200px',
-                'vertical-align': 'top'
+                margin: '0 2px',
             };
             return this.options.printMode ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata.format(this.options.format || 'YYYY-MM-DD')}</div>) :
@@ -177,10 +180,11 @@ export function dialog() {
         },
         render() {
             const style = {
-                width: '200px'
+                width: '200px',
+                margin: '0 2px'
             };
             return this.options.printMode ?
-                (<div style={{ ...style, display: 'inline-block', 'vertical-align': 'top' }}>{this.mdata}</div>) :
+                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-input-search readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" onSearch={() => {
                     alert('还没有实现哦~')
                 }} />);

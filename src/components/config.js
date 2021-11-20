@@ -13,8 +13,7 @@ export default function(vm) {
             .mce-content-body [contentEditable=false][data-mce-selected] { outline: 2px solid #b4d7ff; cursor: default }
             .mce-visualblocks { min-width: calc(100% - 32px); width: fit-content }
             .mce-field { display: inline-block; min-width: 200px; min-height: 20px; border: 1px solid grey; font-size: 12px;
-                line-height: 20px; padding: 0 2px; margin: 0 2px; -webkit-user-select:none; -moz-user-select:none;  -ms-user-select:none; user-select:none;
-                outline: 0px; border-radius: 0px
+                line-height: 20px; padding: 0 2px; margin: 0 1px 0 2px; -webkit-user-select:none; -moz-user-select:none;  -ms-user-select:none; user-select:none;
             }
             .mce-table-line { position: relative; display: block; padding-top: 10px; border: 1px dashed #bbb; min-height: 20px; margin: 2px }
             .mce-table-line::before { content: attr(title); position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 10; font-size: 10px; color: #666666 }
