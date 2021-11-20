@@ -1,6 +1,12 @@
 export default [
     function (vm, event, ctx) { // 转换field
         ctx['data'] = {};
+        ctx['props'] = {
+            printMode: {
+                type: 'Boolean',
+                default: false
+            }
+        };
         ctx['body'] = event.target.dom.create('body', {}, event.content);
         const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-field', ctx['body']);
@@ -13,11 +19,11 @@ export default [
         ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
             if (!n.classList.contains('tl')) {
-                const input = event.target.dom.create('input', { class: 'mce-field', id: n.id, 'v-model': `formData.${cacheFields[n.id].name}` });
+                const input = event.target.dom.create('f-' + cacheFields[n.id].category, { id: n.id, 'v-model': `formData.${cacheFields[n.id].name}`, ':options': '{printMode}' });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
                 ctx['data'].formData[cacheFields[n.id].name] = null;
             } else {
-                const input = event.target.dom.create('input', { class: 'mce-field', ':id': `'${n.id}_' + idx`, 'v-model': `item.${cacheFields[n.id].name}` });
+                const input = event.target.dom.create('f-' + cacheFields[n.id].category, { ':id': `'${n.id}_' + idx`, 'v-model': `item.${cacheFields[n.id].name}` });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
             }
         });

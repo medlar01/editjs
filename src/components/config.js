@@ -9,7 +9,7 @@ export default function(vm) {
         plugins: 'print preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking toc insertdatetime advlist lists imagetools textpattern noneditable help charmap quickbars emoticons',
         toolbar: 'undo redo | fullscreen  preview code | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | table | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | insertfile image media template link codesample | visualblocks ltr rtl',
         content_style: `
-            body { font-family:Helvetica,Arial,sans-serif; font-size:14px } 
+            body { font-family:Helvetica,Arial,sans-serif; font-size:14px; padding: 5px } 
             .mce-content-body [contentEditable=false][data-mce-selected] { outline: 2px solid #b4d7ff; cursor: default }
             .mce-visualblocks { min-width: calc(100% - 32px); width: fit-content }
             .mce-field { display: inline-block; min-width: 200px; min-height: 20px; border: 1px solid grey; font-size: 12px;

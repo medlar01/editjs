@@ -13,6 +13,7 @@
     "dedent": "^0.7.0",
     "element-resize-detector": "^1.2.3",
     "mockjs": "^1.1.0",
+    "moment": "^2.29.1",
     "node-sass": "^6.0.1",
     "prettier": "^2.4.1",
     "sass": "^1.43.3",

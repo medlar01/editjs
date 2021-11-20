@@ -58,6 +58,12 @@ import parserBabel from 'prettier/parser-babel'
 import { constTableTpl } from './config'
 import plugin, { unique } from './plugin'
 import conversions from './conversion'
+import { 
+    input, 
+    textarea,
+    date,
+    select
+} from './field'
 export default {
     components: {
         Tinymce,
@@ -120,7 +126,7 @@ export default {
     created() {
         const vm = this;
         this.plugins.push(plugin);
-        this.insidePlugins = this.insidePlugins.concat([...this.plugins, (_, edi) => edi.on('preview', (e) => vm.preview(e)), _plugin]);
+        this.insidePlugins = this.insidePlugins.concat([...this.plugins, (_, edi) => edi.on('preview', (e) => vm.preview(e)), g_plugin]);
         conversions.map(conversion => this.conversions.push(conversion));
         this.config['setup'] = function(editor) {
             const plugins = vm.insidePlugins;
@@ -164,7 +170,7 @@ export default {
             if (metadata.disabled) return;
             const { tmceInstance } = this.$refs;
             if (isMain) {
-                const { DOM } = _resolve('tinymce.dom.DOMUtils');
+                const { DOM } = g_resolve('tinymce.dom.DOMUtils');
                 const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
                 tmceInstance.insertElement(htmlField);
                 metadata.disabled = true;
@@ -177,8 +183,8 @@ export default {
 
         insertLineTable(metadata, ctx) {
             const tmceInstance = this.$refs.tmceInstance;
-            const { DOM } = _resolve('tinymce.dom.DOMUtils');
-            let lineTableBlock = DOM.$('#' + metadata.id, _activeEditor().getDoc());
+            const { DOM } = g_resolve('tinymce.dom.DOMUtils');
+            let lineTableBlock = DOM.$('#' + metadata.id, g_activeEditor().getDoc());
             if (lineTableBlock.length > 0) {
                 lineTableBlock = lineTableBlock[0];
                 lineTableBlock.innerHTML = ctx;
@@ -224,7 +230,7 @@ export default {
                             this.tabs.splice(index, 1);
                             this.editLines.splice(index, 1);
                         }
-                        _syncLoading(this, () => {
+                        g_syncLoading(this, () => {
                             this.insertLineTable(result.metadata, result.ctx);
                         });
                     }
@@ -246,7 +252,7 @@ export default {
             this.editLines[index] = metadata;
             this.akey = 'tab-' + (4 + index);
             const self = this;
-            _syncLoading(this, () => {
+            g_syncLoading(this, () => {
                 const ref = self.$refs['editLine' + (4 + index)][0];
                 ref.setContent(ctx || constTableTpl);
             });
@@ -257,15 +263,37 @@ export default {
             const conversions = this.conversions;
             const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
             conversions.map(conversion => conversion(this, event, ctx));
+            // 底部添加按钮
+            const gbtms = DOMUtils.DOM.create('div', {style: 'background-color: white; position: fixed; top: 497px; right: 0'});
+            const btm1 = DOMUtils.DOM.create('a-button', {'v-on:click': 'printMode = false','v-show': 'printMode', type: 'link'}, '编辑模式');
+            const btm2 = DOMUtils.DOM.create('a-button', {'v-on:click': 'printMode = true', 'v-show': '!printMode', type: 'link'}, '打印模式');
+            const btm3 = DOMUtils.DOM.create('a-button', {'v-on:click': `() => {
+                window.alert(JSON.stringify(this.formData));
+            }`, type: 'link'}, '获取数据');
+            gbtms.appendChild(btm1);
+            gbtms.appendChild(btm2);
+            gbtms.appendChild(btm3);
+            ctx['body'].appendChild(gbtms);
             const content = ctx['body'].innerHTML;
             ctx['body'].innerHTML = '';
             const div = DOMUtils.DOM.create('div', {id: 'app'});
             ctx['body'].appendChild(div);
             const vue = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/vue@2'});
             const axios = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js'});
+            const antdLink = DOMUtils.DOM.create('link', {rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/ant-design-vue@1.7.8/dist/antd.css'});
+            const antd = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/ant-design-vue@1.7.8/dist/antd.js'});
+            const moment = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.js'});
             ctx['body'].appendChild(vue);
             ctx['body'].appendChild(axios);
+            ctx['body'].appendChild(moment);
+            ctx['body'].appendChild(antdLink);
+            ctx['body'].appendChild(antd);
+            ctx['data'].moment = 'moment';
             const metds = ctx['methods'];
+            if (g_hasKey(ctx['props'], 'printMode')) {
+                ctx['data'].printMode = ctx['props'].printMode?.default || false;
+                delete ctx['props'].printMode;
+            }
             const script = DOMUtils.DOM.create('script', {type: "text/javascript"}, `
                 (function() {
                     const win = window.parent;
@@ -275,44 +303,39 @@ export default {
                     setInterval(() => {
                         page.style.height = '557px';
                     }, 500);
-
                     Vue.prototype.axios = axios;
-                    const vue = new Vue({
+                    const p = win.__PREVIEW__;
+                    p.$app  = new Vue({
                         el: '#app',
-                        data: ${JSON.stringify(ctx['data'])},
+                        props: ${JSON.stringify(ctx['props'], null, 4).replace(/"type": "([^"]+)"/g, 'type: $1')},
+                        data: ${JSON.stringify(ctx['data'], null, 4).replace(/"moment": "([^"]+)"/g, 'moment: $1')},
                         template: \`<div>${content}</div>\`,
+                        components: { ...p.components },
                         methods: {
                             ${Object.keys(metds).map(key => key + metds[key] + ' ')}
                         }
                     });
-                    win.__preview__ = { vue };
                 })();
             `);
             ctx['body'].appendChild(script);
             event.content = ctx['body'].innerHTML;
+            window['__PREVIEW__'] = {
+                components: {
+                    'f-input': input(),
+                    'f-textarea': textarea(),
+                    'f-date': date(),
+                    'f-select': select()
+                }
+            };
+            console.log(ctx);
         }
     }
 }
 
-function _plugin(vm, edi) {
+function g_plugin(vm, edi) {
     edi.on('winopen', (event) => {
         if (event.args.title == 'Preview') {
-            // 定制按钮
             event.content = edi.getBody().innerHTML;
-            const { buttons } = event.args;
-            buttons[0].primary = false;
-            buttons.push({
-                name: "获取数据",
-                primary: true,
-                text: "获取数据",
-                type: "submit"
-            });
-            event.args.onSubmit = (api) => {
-                alert(JSON.stringify(window['__preview__'].vue.$data.formData));
-                api.close();
-            }
-            event.args.size = "large"
-
             // 重定义布局
             const items = event.args.body.items;
             items[0].sandboxed = false;
@@ -343,7 +366,11 @@ function _plugin(vm, edi) {
             conversions.map(conversion => conversion(vm, event, ctx));
             const content = ctx['body'].innerHTML;
             const metds = ctx['methods'];
-            const html = prettier.format(`<template>${content}</template><script>export default {data() { return ${JSON.stringify(ctx['data'], null, 4)} }, methods: { ${Object.keys(metds).map(key => key + metds[key] + ' ')} }}</` + 'script>', {
+            const html = prettier.format(`<template>${content}</template><script>export default {
+                    props: ${JSON.stringify(ctx['props'], null, 4).replace(/"type": "([^"]+)"/g, 'type: $1')},
+                    data() { return ${JSON.stringify(ctx['data'], null, 4).replace(/"moment": "([^"]+)"/g, 'moment: $1')} }, 
+                    methods: { ${Object.keys(metds).map(key => key + metds[key] + ' ')} }
+                }${'</'}script>`, {
                 parser: 'vue',
                 plugins: [parserHtml, parserBabel],
                 "arrowParens": "always",
@@ -414,7 +441,7 @@ function _plugin(vm, edi) {
     });
 }
 
-function _syncLoading(self, callback) {
+function g_syncLoading(self, callback) {
     const timer = setInterval(() => {
         if (!self.loading) {
             clearInterval(timer);
@@ -423,12 +450,16 @@ function _syncLoading(self, callback) {
     }, 500);
 }
 
-function _resolve(ctx, editor) {
+function g_resolve(ctx, editor) {
     return window['tinyMCE'].resolve(ctx, editor);
 }
 
-function _activeEditor() {
+function g_activeEditor() {
     return window['tinyMCE'].activeEditor;
+}
+
+function g_hasKey(obj, key) {
+    return Object.keys(obj).includes(key);
 }
 </script>
 

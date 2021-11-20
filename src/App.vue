@@ -16,8 +16,8 @@ const events = [
             comment: '员工工号/EMPLOYEE_CODE'
         },
         events: {
-            OnChange_s1j478f7rfu: {
-                type: 'change',
+            OnBlur_s1j478f7rfu: {
+                type: 'blur',
                 bus: 'script',
                 action: [
                     {

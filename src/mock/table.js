@@ -14,7 +14,7 @@ export default function() {
                 {
                     name: 'employee_code',
                     comment: '员工工号',
-                    category: 'dialog',
+                    category: 'date',
                     editable: true,
                     id: 'f1j47a194g2h'
                 },

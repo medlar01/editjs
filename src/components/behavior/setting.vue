@@ -73,6 +73,7 @@ const AddEventDialog = {
                     <a-select-option value="change">change</a-select-option>
                     <a-select-option value="input">input</a-select-option>
                     <a-select-option value="keyup">keyup</a-select-option>
+                    <a-select-option value="blur">blur</a-select-option>
                 </a-select>
             </div>
             <br/>
@@ -176,17 +177,23 @@ export default {
                         comment: val.comment + '/' + val.name.toUpperCase()
                     },
                     events: {}
-                })
+                });
             }
         },
         addEvent(data) {
-            const eventName = `On${data.type}_${unique()}`;
+            const eventName = `On${$beginUpperCase(data.type)}_${unique()}`;
             this.$set(this.currEvent.events, eventName, {
                 ...data,
                 action: []
             });
         }
     }
+}
+
+function $beginUpperCase(val) {
+    if (!val) return val;
+    if (val.length == 0) return val;
+    return val.substr(0, 1).toUpperCase() + val.substr(1, val.length);
 }
 </script>
 
