@@ -22,7 +22,7 @@
 </template>
 
 <script>
-
+import { hasKey } from '@/utils/common'
 const nameMaps = { input: '文本', textarea: '文本域', number: '数值', date: '日期', select: '下拉', dialog: '弹窗' };
 const EditableCell = {
     render() {
@@ -55,6 +55,26 @@ const EditableCell = {
     }
 };
 
+const EditCell = {
+    props: ['row'],
+    render() {
+        console.log('EditCell.row', this.row);
+        let slot = null;
+        switch(this.row.category) {
+            case "date": {
+                slot = (<a-input size="small" style="width: 200px" v-model={this.row.format} placeholder="请输入日期格式"/>);
+                break;
+            }
+            case "select": {
+                // if (!hasKey(this.row, 'options')) {
+                //     this.$set(this.row, 'options', null);
+                // }
+                slot = (<a-input size="small" style="width: 200px" v-model={this.row.options} placeholder="请输入选项，使用【,】分割"/>);
+            }
+        }
+        return (<div>{slot}</div>);
+    }
+}
 
 export default {
     props: {
@@ -93,14 +113,21 @@ export default {
                     }
                 },
                 {
-                    width: 150,
+                    width: 120,
                     key: 'category',
                     title: '表单类别',
                     dataIndex: 'category',
                     customRender: (val, row) => {
                         return (<EditableCell value={val} onEdit={(value) =>  row.category = value} />);
                     }
-                }, {}
+                }, {
+                    key: '-',
+                    title: '其他',
+                    dataIndex: '-',
+                    customRender: (val, row) => {
+                        return (<EditCell row={row} />);
+                    }
+                }
             ],
             tableData: {}
         }

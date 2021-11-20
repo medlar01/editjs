@@ -11,15 +11,25 @@ export default [
         const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-field', ctx['body']);
         if (!ctx['data'].formData) ctx['data'].formData = {};
-        
+
         const cacheFields = {};
-        [...vm.data.main.fields, ...[].concat(...vm.data.lines.map(it => it.fields), 
-            ...vm.data.lines.map(it => ({id: it.id, comment: it.table_comment, name: it.table_name})))]
+        [...vm.data.main.fields, ...[].concat(...vm.data.lines.map(it => it.fields),
+            ...vm.data.lines.map(it => ({ id: it.id, comment: it.table_comment, name: it.table_name })))]
             .forEach(it => cacheFields[it.id] = it);
         ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
             if (!n.classList.contains('tl')) {
-                const input = event.target.dom.create('f-' + cacheFields[n.id].category, { id: n.id, 'v-model': `formData.${cacheFields[n.id].name}`, ':options': '{printMode}' });
+                const opt = { printMode: 'printMode' };
+                const exclude = ['id', 'editable', 'category', 'comment', 'name', 'pk'];
+                objEach(cacheFields[n.id], (it, key) => {
+                    if (!exclude.includes(key)) {
+                        opt[key] = it;
+                    }
+                })
+                const optionString = JSON.stringify(opt, null, 4)
+                    .replace(/"printMode": "([^"]+)"/g, 'printMode: $1');
+                console.log(cacheFields[n.id].category, optionString, cacheFields[n.id]);
+                const input = event.target.dom.create('f-' + cacheFields[n.id].category, { id: n.id, 'v-model': `formData.${cacheFields[n.id].name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
                 ctx['data'].formData[cacheFields[n.id].name] = null;
             } else {
@@ -45,7 +55,7 @@ export default [
         });
     },
 
-    function(vm, event, ctx) { // 事件集成
+    function (vm, event, ctx) { // 事件集成
         const events = vm.events;
         const mtds = ctx['methods'] = {};
         events.forEach(evt => {
@@ -54,7 +64,7 @@ export default [
                 const convString = conv(ctx, ev);
                 if (convString) {
                     (evts[ev.type] = evts[ev.type] || []).push(key + '()');
-                    mtds[key] =  `() { ${convString} }`;
+                    mtds[key] = `() { ${convString} }`;
                 }
             });
             const block = ctx['body'].querySelector('#' + evt.field.id);
@@ -74,7 +84,7 @@ function objEach(obj, callback) {
 function conv(ctx, ev) {
     const cache = ctx['cacheFields'];
     const formData = ctx['data'].formData;
-    switch(ev.bus) {
+    switch (ev.bus) {
         case 'default': {
             return ev.action.map(it => {
                 if (!Object.keys(formData).includes(cache[it.id].name)) return null;
@@ -83,7 +93,7 @@ function conv(ctx, ev) {
         }
         case 'script': {
             return ev.action.map(it => {
-                switch(it.exec.type) {
+                switch (it.exec.type) {
                     case "script": {
                         return it.exec.value;
                     }
@@ -92,7 +102,7 @@ function conv(ctx, ev) {
                             .then((res) => { ${it.exec.value} })
                         `
                     }
-                    default : return null;
+                    default: return null;
                 }
             }).join(';');
         }

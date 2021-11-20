@@ -62,7 +62,8 @@ import {
     input, 
     textarea,
     date,
-    select
+    select,
+    dialog,
 } from './field'
 export default {
     components: {
@@ -324,10 +325,10 @@ export default {
                     'f-input': input(),
                     'f-textarea': textarea(),
                     'f-date': date(),
-                    'f-select': select()
+                    'f-select': select(),
+                    'f-dialog': dialog(),
                 }
             };
-            console.log(ctx);
         }
     }
 }

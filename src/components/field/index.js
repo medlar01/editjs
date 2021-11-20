@@ -19,8 +19,10 @@ export function input() {
                     this.mdata = n;
                 }
             },
-            mdata(n) {
-                this.$emit('change', n);
+            mdata(n, o) {
+                if (n != o) {
+                    this.$emit('change', n);
+                }
             }
         },
         render() {
@@ -29,7 +31,7 @@ export function input() {
             };
             return this.options.printMode ?
                 (<div style={{ ...style, display: 'inline-block', 'vertical-align': 'top' }}>{this.mdata}</div>) :
-                (<a-input onBlur={this.$listeners.blur || Fn} style={style} size="small" v-model={this.mdata} />);
+                (<a-input onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} />);
         }
     }
 }
@@ -53,8 +55,10 @@ export function textarea() {
                     this.mdata = n;
                 }
             },
-            mdata(n) {
-                this.$emit('change', n);
+            mdata(n, o) {
+                if (n != o) {
+                    this.$emit('change', n);
+                }
             }
         },
         render() {
@@ -64,7 +68,7 @@ export function textarea() {
             };
             return this.options.printMode ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
-                (<a-textarea onBlur={this.$listeners.blur || Fn} style={style} size="small" v-model={this.mdata} />);
+                (<a-textarea onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} />);
         }
     }
 }
@@ -88,8 +92,10 @@ export function select() {
                     this.mdata = n;
                 }
             },
-            mdata(n) {
-                this.$emit('change', n);
+            mdata(n, o) {
+                if (n != o) {
+                    this.$emit('change', n);
+                }
             }
         },
         render() {
@@ -97,9 +103,12 @@ export function select() {
                 width: '200px',
                 'vertical-align': 'top'
             };
+            const list = ['-'].concat(this.options.options?.split(',') || []);
             return this.options.printMode ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
-                (<a-select onBlur={this.$listeners.blur || Fn} style={style} size="small" v-model={this.mdata} />);
+                (<a-select onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata}>
+                    {list.map((val, idx) => (<a-select-option value={idx}>{val}</a-select-option>))}
+                </a-select>);
         }
     }
 }
@@ -120,11 +129,13 @@ export function date() {
             value: {
                 immediate: true,
                 handler(n) {
-                    this.mdata = n||'';
+                    this.mdata = n || '';
                 }
             },
-            mdata(n) {
-                this.$emit('change', n);
+            mdata(n, o) {
+                if (n != o) {
+                    this.$emit('change', n);
+                }
             }
         },
         render() {
@@ -133,8 +144,56 @@ export function date() {
                 'vertical-align': 'top'
             };
             return this.options.printMode ?
-                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata.format('YYYY-MM-DD')}</div>) :
-                (<a-date-picker onBlur={this.$listeners.blur || Fn} style={style} size="small" v-model={this.mdata} format="YYYY-MM-DD"/>);
+                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata.format(this.options.format || 'YYYY-MM-DD')}</div>) :
+                (<a-date-picker onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} format={this.options.format || 'YYYY-MM-DD'} />);
+        }
+    }
+}
+
+export function dialog() {
+    return {
+        props: ['value', 'options'],
+        model: {
+            prop: 'value',
+            event: 'change'
+        },
+        data() {
+            return {
+                mdata: null
+            }
+        },
+        watch: {
+            value: {
+                immediate: true,
+                handler(n) {
+                    this.mdata = n;
+                }
+            },
+            mdata(n, o) {
+                if (n != o) {
+                    this.$emit('change', n);
+                }
+            }
+        },
+        render() {
+            const style = {
+                width: '200px'
+            };
+            return this.options.printMode ?
+                (<div style={{ ...style, display: 'inline-block', 'vertical-align': 'top' }}>{this.mdata}</div>) :
+                (<a-input-search readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" onSearch={() => {
+                    alert('还没有实现哦~')
+                }} />);
+        }
+    }
+}
+
+function $blur(vm, cb) {
+    var old = null;
+    return function (e) {
+        if (old != vm.mdata) {
+            old = vm.mdata;
+            (cb || Fn)(e);
         }
     }
 }

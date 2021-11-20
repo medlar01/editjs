@@ -2,6 +2,10 @@ export function objEach(obj, callback) {
     Object.keys(obj).forEach(i => callback(obj[i], i));
 }
 
+export function hasKey(obj, key) {
+    return Object.keys(obj).includes(key);
+}
+
 const cacheUniques = [-1, 0];
 /**
  * 使用日期生成唯一值
