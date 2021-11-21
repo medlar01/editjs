@@ -1,6 +1,6 @@
 const Fn = () => { }
 // 预览时存在缓存该组件，所以使用函数每次预览返回一个新的
-export function input() {
+export function inputMaker() {
     return {
         props: ['value', 'options'],
         model: {
@@ -37,7 +37,7 @@ export function input() {
     }
 }
 
-export function textarea() {
+export function textareaMaker() {
     return {
         props: ['value', 'options'],
         model: {
@@ -70,13 +70,12 @@ export function textarea() {
             };
             return this.options.printMode ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata?.split(/[\s\n]/).map(it => <div>{it}</div>)}</div>):
-                // (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-textarea onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} />);
         }
     }
 }
 
-export function select() {
+export function selectMaker() {
     return {
         props: ['value', 'options'],
         model: {
@@ -108,7 +107,7 @@ export function select() {
             };
             const list = ['-'].concat(this.options.options?.split(',') || []);
             return this.options.printMode ?
-                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
+                (<div style={{ ...style, display: 'inline-block' }}>{list[this.mdata]}</div>) :
                 (<a-select onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata}>
                     {list.map((val, idx) => (<a-select-option value={idx}>{val}</a-select-option>))}
                 </a-select>);
@@ -116,7 +115,7 @@ export function select() {
     }
 }
 
-export function date() {
+export function dateMaker() {
     return {
         props: ['value', 'options'],
         model: {
@@ -153,7 +152,7 @@ export function date() {
     }
 }
 
-export function dialog() {
+export function dialogMaker() {
     return {
         props: ['value', 'options'],
         model: {

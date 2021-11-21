@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import axios from 'axios' 
 import Tinymce from './Tinymce.vue'
 import EditLine from './EditLine.vue'
 import FormSetting from './FormSetting.vue'
@@ -59,11 +60,11 @@ import { constTableTpl } from './config'
 import plugin, { unique } from './plugin'
 import conversions from './conversion'
 import { 
-    input, 
-    textarea,
-    date,
-    select,
-    dialog,
+    inputMaker,
+    textareaMaker,
+    dateMaker,
+    selectMaker,
+    dialogMaker,
 } from './field'
 export default {
     components: {
@@ -172,7 +173,7 @@ export default {
             const { tmceInstance } = this.$refs;
             if (isMain) {
                 const { DOM } = g_resolve('tinymce.dom.DOMUtils');
-                const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
+                const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase() + '<i class="iconfont iconedit"/>');
                 tmceInstance.insertElement(htmlField);
                 metadata.disabled = true;
                 tmceInstance.focus();
@@ -280,12 +281,10 @@ export default {
             const div = DOMUtils.DOM.create('div', {id: 'app'});
             ctx['body'].appendChild(div);
             const vue = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/vue@2'});
-            const axios = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js'});
             const antdLink = DOMUtils.DOM.create('link', {rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/ant-design-vue@1.7.8/dist/antd.css'});
             const antd = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/ant-design-vue@1.7.8/dist/antd.js'});
             const moment = DOMUtils.DOM.create('script', {src: 'https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.js'});
             ctx['body'].appendChild(vue);
-            ctx['body'].appendChild(axios);
             ctx['body'].appendChild(moment);
             ctx['body'].appendChild(antdLink);
             ctx['body'].appendChild(antd);
@@ -304,14 +303,16 @@ export default {
                     setInterval(() => {
                         page.style.height = '557px';
                     }, 500);
-                    Vue.prototype.axios = axios;
                     const p = win.__PREVIEW__;
+                    const components = {};
+                    Object.keys(p.components).map(i => components[i] = p.components[i]());
+                    Vue.prototype.axios = p.axios;
                     p.$app  = new Vue({
                         el: '#app',
                         props: ${JSON.stringify(ctx['props'], null, 4).replace(/"type": "([^"]+)"/g, 'type: $1')},
                         data: ${JSON.stringify(ctx['data'], null, 4).replace(/"moment": "([^"]+)"/g, 'moment: $1')},
                         template: \`<div>${content}</div>\`,
-                        components: { ...p.components },
+                        components: components,
                         methods: {
                             ${Object.keys(metds).map(key => key + metds[key] + ' ')}
                         }
@@ -321,12 +322,13 @@ export default {
             ctx['body'].appendChild(script);
             event.content = ctx['body'].innerHTML;
             window['__PREVIEW__'] = {
+                axios,
                 components: {
-                    'f-input': input(),
-                    'f-textarea': textarea(),
-                    'f-date': date(),
-                    'f-select': select(),
-                    'f-dialog': dialog(),
+                    'f-input': inputMaker,
+                    'f-textarea': textareaMaker,
+                    'f-date': dateMaker,
+                    'f-select': selectMaker,
+                    'f-dialog': dialogMaker,
                 }
             };
         }

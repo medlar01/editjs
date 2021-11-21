@@ -100,7 +100,7 @@ export default {
                 return;
             }
             const { DOM } = g_resolve('tinymce.dom.DOMUtils');
-            const htmlField = DOM.create('span', { class: 'unedit mce-field tl', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase());
+            const htmlField = DOM.create('span', { class: 'unedit mce-field tl', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase() + '<i class="iconfont iconedit"/>');
             tmceInstance.insertElement(htmlField);
             metadata.disabled = true;
             tmceInstance.focus();
@@ -204,14 +204,6 @@ function g_plugin(vm, editor) {
             changeEvents(editor.getEventDispatcher(), ['mousemove'], removed);
         });
     });
-
-    // editor.on('Winopen', function(event) {
-    //     console.log("winopen", event);
-    //     if (event.args.title == 'Row Properties') {
-    //         const tds = event.target.dom.$('.line_field_row td[data-mce-selected]');
-    //         event.args.body.tabs[0].items[0].disabled = tds.length > 0;
-    //     }
-    // });
 }
 
 function g_regConfig(edi) {
