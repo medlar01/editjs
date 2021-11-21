@@ -18,22 +18,21 @@ export default [
             .forEach(it => cacheFields[it.id] = it);
         ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
+            const opt = { printMode: 'printMode' };
+            const exclude = ['id', 'editable', 'category', 'comment', 'name', 'pk'];
+            objEach(cacheFields[n.id], (it, key) => {
+                if (!exclude.includes(key)) {
+                    opt[key] = it;
+                }
+            });
+            const optionString = JSON.stringify(opt, null, 4)
+                .replace(/"printMode": "([^"]+)"/g, 'printMode: $1');
             if (!n.classList.contains('tl')) {
-                const opt = { printMode: 'printMode' };
-                const exclude = ['id', 'editable', 'category', 'comment', 'name', 'pk'];
-                objEach(cacheFields[n.id], (it, key) => {
-                    if (!exclude.includes(key)) {
-                        opt[key] = it;
-                    }
-                })
-                const optionString = JSON.stringify(opt, null, 4)
-                    .replace(/"printMode": "([^"]+)"/g, 'printMode: $1');
-                console.log(cacheFields[n.id].category, optionString, cacheFields[n.id]);
                 const input = event.target.dom.create('f-' + cacheFields[n.id].category, { id: n.id, 'v-model': `formData.${cacheFields[n.id].name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
                 ctx['data'].formData[cacheFields[n.id].name] = null;
             } else {
-                const input = event.target.dom.create('f-' + cacheFields[n.id].category, { ':id': `'${n.id}_' + idx`, 'v-model': `item.${cacheFields[n.id].name}` });
+                const input = event.target.dom.create('f-' + cacheFields[n.id].category, { ':id': `'${n.id}_' + idx`, 'v-model': `item.${cacheFields[n.id].name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
             }
         });

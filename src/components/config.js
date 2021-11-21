@@ -7,12 +7,12 @@ export default function(vm) {
         menubar: false,
         toolbar_sticky: false,
         plugins: 'print preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking toc insertdatetime advlist lists imagetools textpattern noneditable help charmap quickbars emoticons',
-        toolbar: 'undo redo | fullscreen  preview code | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | table | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | insertfile image media template link codesample | visualblocks ltr rtl',
+        toolbar: 'fieldreadonly undo redo | fullscreen  preview code | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | table | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | insertfile image media template link codesample | visualblocks ltr rtl',
         content_style: `
             body { font-family:Helvetica,Arial,sans-serif; font-size:14px; padding: 5px } 
             .mce-content-body [contentEditable=false][data-mce-selected] { outline: 2px solid #b4d7ff; cursor: default }
             .mce-visualblocks { min-width: calc(100% - 32px); width: fit-content }
-            .mce-field { display: inline-block; min-width: 200px; min-height: 20px; border: 1px solid grey; font-size: 12px; position: relative;
+            .mce-field { display: inline-block; min-height: 20px; border: 1px solid grey; font-size: 12px; position: relative;
                 line-height: 20px; padding: 0 2px; margin: 0 1px 0 2px; -webkit-user-select:none; -moz-user-select:none;  -ms-user-select:none; user-select:none;
                 color: #666666; font-weight: bold;
             }
@@ -47,7 +47,7 @@ export default function(vm) {
 export const constTableTpl = `
 <table style="width: 939.016px; background-color: white" border="1">
 <thead>
-<tr style="background-color: #bfedd2; text-align: center;">
+<tr style="text-align: center;">
 <td style="width: 220.719px;" scope="col">&nbsp;</td>
 <td style="width: 220.719px;" scope="col">&nbsp;</td>
 <td style="width: 220.719px;" scope="col">&nbsp;</td>

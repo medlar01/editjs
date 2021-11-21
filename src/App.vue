@@ -8,7 +8,16 @@
 import Editjs from "./components/Editjs.vue"
 import tableMock from './mock/table'
 import dedent from 'dedent'
-const context = '<div><span id="f1j47a194g2h" class="unedit mce-field">员工工号/EMPLOYEE_CODE<i class="iconfont iconread-only"/></span><span id="l1j47al23q1j" class="unedit mce-field">员工姓名/EMPLOYEE_NAME<i class="iconfont iconhidden-l"/></span></div>';
+const context = dedent`<div>
+        <span id="f1j47a194g2h" class="unedit mce-field" style="width: 200px">
+            员工工号/EMPLOYEE_CODE
+            <i class="iconfont iconread-only"/>
+        </span>
+        <span id="l1j47al23q1j" class="unedit mce-field" style="width: 200px">
+            员工姓名/EMPLOYEE_NAME
+            <i class="iconfont iconhidden-l"/>
+        </span>
+    </div>`;
 const events = [
     {
         field: {

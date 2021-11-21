@@ -57,7 +57,8 @@ import prettier from 'prettier'
 import parserHtml from 'prettier/parser-html'
 import parserBabel from 'prettier/parser-babel'
 import { constTableTpl } from './config'
-import plugin, { unique } from './plugin'
+import plugin from './plugin'
+import { unique } from '@/utils/common'
 import conversions from './conversion'
 import { 
     inputMaker,
@@ -173,7 +174,8 @@ export default {
             const { tmceInstance } = this.$refs;
             if (isMain) {
                 const { DOM } = g_resolve('tinymce.dom.DOMUtils');
-                const htmlField = DOM.create('span', { class: 'unedit mce-field', id: metadata.id }, metadata.comment + '/' + metadata.name.toUpperCase() + '<i class="iconfont iconedit"/>');
+                const args = { class: 'unedit mce-field', id: metadata.id, style: 'width: 200px' };
+                const htmlField = DOM.create('span', args, metadata.comment + '/' + metadata.name.toUpperCase() + '<i class="iconfont iconedit"/>');
                 tmceInstance.insertElement(htmlField);
                 metadata.disabled = true;
                 tmceInstance.focus();
@@ -251,9 +253,10 @@ export default {
                 this.tabs.push(metadata.table_comment);
                 index = this.tabs.length - 1;
             }
+
             this.editLines[index] = metadata;
-            this.akey = 'tab-' + (4 + index);
             const self = this;
+            this.akey = 'tab-' + (4 + index);
             g_syncLoading(this, () => {
                 const ref = self.$refs['editLine' + (4 + index)][0];
                 ref.setContent(ctx || constTableTpl);
