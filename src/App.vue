@@ -8,14 +8,15 @@
 import Editjs from "./components/Editjs.vue"
 import tableMock from './mock/table'
 import dedent from 'dedent'
-const context = dedent`<div>
+const context = dedent`
+    <div>
         <span id="f1j47a194g2h" class="unedit mce-field" style="width: 200px">
             员工工号/EMPLOYEE_CODE
-            <i class="iconfont iconread-only"/>
+            <i class="iconfont iconedit"/>
         </span>
         <span id="l1j47al23q1j" class="unedit mce-field" style="width: 200px">
             员工姓名/EMPLOYEE_NAME
-            <i class="iconfont iconhidden-l"/>
+            <i class="iconfont iconedit"/>
         </span>
     </div>`;
 const events = [

@@ -126,6 +126,9 @@ export default function (vm, editor) {
             delClass(currNode.children[0]);
             addClass(currNode.children[0], ['iconfont', 'iconhidden-l']);
             api.setDisabled(true);
+            const field = vm.data.main.fields.find(i => i.id == currNode.id);
+            field.hidden = true;
+            field.editable = true;
             currNode.rapi.setDisabled(false);
         }
     });
@@ -142,6 +145,9 @@ export default function (vm, editor) {
             delClass(currNode.children[0]);
             addClass(currNode.children[0], ['iconfont', 'iconread-only']);
             api.setDisabled(true);
+            const field = vm.data.main.fields.find(i => i.id == currNode.id);
+            field.hidden = false;
+            field.editable = false;
             currNode.hapi.setDisabled(false);
         }
     })
@@ -179,8 +185,11 @@ function makeFieldDialog(vm, edi) {
                 },
                 {
                     type: 'grid',
-                    columns: 2,
+                    columns: 3,
                     items: [
+                        { type: 'label', label: '无边框', items: [
+                            { type: 'checkbox', name: 'noborder', label: '消除框边线' }
+                        ]},
                         { type: 'label', label: '隐藏', items: [
                             { type: 'checkbox', name: 'hidden', label: '字段不可见' }
                         ]},
@@ -198,15 +207,22 @@ function makeFieldDialog(vm, edi) {
         onSubmit: (api) => {
             const data = api.getData();
             cachedElement.style.width = data.width;
+            const field = vm.data.main.fields.find(i => i.id == cachedElement.id);
             delClass(cachedElement.children[0]);
             if (data.hidden) {
                 addClass(cachedElement.children[0], ['iconfont', 'iconhidden-l']);
+                field.hidden = true;
             } else 
             if (data.readonly) {
                 addClass(cachedElement.children[0], ['iconfont', 'iconread-only']);
+                field.editable = false;
             } else {
                 addClass(cachedElement.children[0], ['iconfont', 'iconedit']);
+                field.hidden = false;
+                field.editable = true;
             }
+            field.noBorder = data.noborder;
+            cachedElement.style.border = data.noborder ? '1px dashed' : null;
             api.close();
         }
     };
@@ -215,7 +231,7 @@ function makeFieldDialog(vm, edi) {
         if (!isField(currNode)) {
             return;
         }
-        const field = vm.data.main.fields.find(i => i.id = currNode.id);
+        const field = vm.data.main.fields.find(i => i.id == currNode.id);
         const style = currNode.style;
         pannelArgs['title'] = `字段：${currNode.innerText}`
         pannelArgs['initialData'] = {
@@ -223,6 +239,7 @@ function makeFieldDialog(vm, edi) {
             category: field.category,
             hidden: currNode.children[0].classList.contains('iconhidden-l'),
             readonly: currNode.children[0].classList.contains('iconread-only'),
+            noborder: (field.noBorder || false)
         };
         cachedElement = currNode;
         edi.windowManager.open(pannelArgs);

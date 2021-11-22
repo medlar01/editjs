@@ -19,7 +19,8 @@ export default [
         ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
             const opt = { printMode: 'printMode' };
-            const exclude = ['id', 'editable', 'category', 'comment', 'name', 'pk'];
+            const exclude = ['id', 'disabled', 'category', 'comment', 'name', 'pk'];
+            console.log(cacheFields[n.id]);
             objEach(cacheFields[n.id], (it, key) => {
                 if (!exclude.includes(key)) {
                     opt[key] = it;

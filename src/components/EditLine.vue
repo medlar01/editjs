@@ -101,6 +101,7 @@ export default {
             }
             const { DOM } = g_resolve('tinymce.dom.DOMUtils');
             const args = { class: 'unedit mce-field', id: metadata.id, style: 'width: 200px' };
+            if (metadata.noBorder) args['border'] = '1px dashed';
             const htmlField = DOM.create('span', args, metadata.comment + '/' + metadata.name.toUpperCase() + '<i class="iconfont iconedit"/>');
             tmceInstance.insertElement(htmlField);
             metadata.disabled = true;
