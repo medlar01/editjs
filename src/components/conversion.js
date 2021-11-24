@@ -18,14 +18,12 @@ export default [
             .forEach(it => cacheFields[it.id] = it);
         ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
-            const opt = { printMode: 'printMode' };
-            const exclude = ['id', 'disabled', 'category', 'comment', 'name', 'pk'];
-            console.log(cacheFields[n.id]);
-            objEach(cacheFields[n.id], (it, key) => {
-                if (!exclude.includes(key)) {
-                    opt[key] = it;
-                }
-            });
+            const opt = { 
+                printMode: 'printMode',
+                hidden: n.children[0].classList.contains('iconhidden-l'),
+                readonly: n.children[0].classList.contains('iconread-only'),
+                nobor: (n.getAttribute('mce-nobor') == 'true' || false)
+            };
             const optionString = JSON.stringify(opt, null, 4)
                 .replace(/"printMode": "([^"]+)"/g, 'printMode: $1');
             if (!n.classList.contains('tl')) {

@@ -19,11 +19,14 @@ export default function(vm) {
             .mce-field > i {
                 background-color: white;position: absolute; right: 0px; padding: 0 5px;
             }
+            .mce-field[mce-nobor="true"] {
+                border: 1px dashed
+            }
             .mce-table-line { position: relative; display: block; padding-top: 10px; border: 1px dashed #bbb; min-height: 20px; margin: 2px }
             .mce-table-line::before { content: attr(title); position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 10; font-size: 10px; color: #666666 }
         `,
         content_css: ['https://cdn.jsdelivr.net/gh/medlar01/tinymce-cdn@5.9.2.4/icons/iconfont/iconfont.css'],
-        extended_valid_elements: 'i[class]',
+        extended_valid_elements: 'i[class],span[id|class|style|mce-nobor]',
         table_clone_elements: 'strong em b i font h1 h2 h3 h4 h5 h6 p div',
         table_sizing_mode: 'fixed',
         table_default_styles: {

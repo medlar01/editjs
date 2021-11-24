@@ -1,16 +1,16 @@
 <template>
     <div id="app">
-        <Editjs :data="mock" :content="context" :events="events" />
+        <Editjs v-if="ready" :data="mock" :content="context" :events="events" />
     </div>
 </template>
 
 <script>
+import axios from 'axios'
 import Editjs from "./components/Editjs.vue"
-import tableMock from './mock/table'
 import dedent from 'dedent'
 const context = dedent`
     <div>
-        <span id="f1j47a194g2h" class="unedit mce-field" style="width: 200px">
+        <span id="f1j47a194g2h" mce-nobor="true" class="unedit mce-field" style="width: 200px">
             员工工号/EMPLOYEE_CODE
             <i class="iconfont iconedit"/>
         </span>
@@ -57,8 +57,18 @@ export default {
         return {
             events,
             context,
-            mock: tableMock()
+            ready: false,
+            mock: null
         }
+    },
+    created() {
+        axios.get("/bapi/editjs/mata-info/b3009f91-4b97-11ec-8fd2-b42e99147792")
+            .then(res => {
+                if (res.status == 200) {
+                    this.mock = res.data;
+                    this.ready = true;
+                }
+            });
     }
 }
 </script>

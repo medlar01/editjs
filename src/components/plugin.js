@@ -188,7 +188,7 @@ function makeFieldDialog(vm, edi) {
                     columns: 3,
                     items: [
                         { type: 'label', label: '无边框', items: [
-                            { type: 'checkbox', name: 'noborder', label: '消除框边线' }
+                            { type: 'checkbox', name: 'nobor', label: '消除框边线' }
                         ]},
                         { type: 'label', label: '隐藏', items: [
                             { type: 'checkbox', name: 'hidden', label: '字段不可见' }
@@ -207,22 +207,16 @@ function makeFieldDialog(vm, edi) {
         onSubmit: (api) => {
             const data = api.getData();
             cachedElement.style.width = data.width;
-            const field = vm.data.main.fields.find(i => i.id == cachedElement.id);
             delClass(cachedElement.children[0]);
             if (data.hidden) {
                 addClass(cachedElement.children[0], ['iconfont', 'iconhidden-l']);
-                field.hidden = true;
             } else 
             if (data.readonly) {
                 addClass(cachedElement.children[0], ['iconfont', 'iconread-only']);
-                field.editable = false;
             } else {
                 addClass(cachedElement.children[0], ['iconfont', 'iconedit']);
-                field.hidden = false;
-                field.editable = true;
             }
-            field.noBorder = data.noborder;
-            cachedElement.style.border = data.noborder ? '1px dashed' : null;
+            cachedElement.setAttribute('mce-nobor', data.nobor);
             api.close();
         }
     };
@@ -239,7 +233,7 @@ function makeFieldDialog(vm, edi) {
             category: field.category,
             hidden: currNode.children[0].classList.contains('iconhidden-l'),
             readonly: currNode.children[0].classList.contains('iconread-only'),
-            noborder: (field.noBorder || false)
+            nobor: (currNode.getAttribute('mce-nobor') == 'true' || false)
         };
         cachedElement = currNode;
         edi.windowManager.open(pannelArgs);

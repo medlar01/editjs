@@ -24,7 +24,7 @@ const mixins = () => ({
         'options.printMode': {
             immediate: true,
             handler(n) {
-                if (!n && this.options.noBorder) {
+                if (!n && this.options.nobor) {
                     this.$nextTick(() => {
                         this.$el.children[0].style.border = '0px';
                         this.$el.children[0].style['box-shadow'] = 'unset';
