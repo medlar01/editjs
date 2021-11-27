@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <Editjs v-if="ready" :data="mock" :content="context" :events="events" />
+        <Editjs v-if="ready" :data="mock" :content="context" :events="events" @save="save" />
     </div>
 </template>
 
@@ -62,13 +62,24 @@ export default {
         }
     },
     created() {
-        axios.get("/bapi/editjs/mata-info/b3009f91-4b97-11ec-8fd2-b42e99147792")
+        console.log("events", JSON.stringify(events));
+        axios.get("/bapi/editjs/mata-info/b3009f91-4b97-11ec-8fd2-b42e99147792/node-b11aw23h0")
             .then(res => {
                 if (res.status == 200) {
-                    this.mock = res.data;
+                    this.mock = res.data.tableInfo;
+                    this.events = JSON.parse(res.data.behavior.events.replaceAll('\\\\n', '\\n'));
+                    this.context = res.data.behavior.content;
                     this.ready = true;
                 }
             });
+    },
+    methods: {
+        save(data) {
+            console.log("save data", data);
+            axios.put('/bapi/editjs/mata-info/save/b3009f91-4b97-11ec-8fd2-b42e99147792/node-b11aw23h0', data).then(res => {
+                console.log('res', res);
+            });
+        }
     }
 }
 </script>

@@ -179,7 +179,6 @@ export default {
                 tmceInstance.insertElement(htmlField);
                 metadata.disabled = true;
                 tmceInstance.focus();
-
             } else {
                 this.openTab(metadata);
             }
@@ -217,6 +216,15 @@ export default {
             const actTab = this.akey;
             switch (actTab) {
                 case 'tab-1':
+                    this.$emit('save', {
+                        tableInfo: this.data,
+                        behavior: {
+                            content: this.$refs.tmceInstance.getContent(),
+                            events: JSON.stringify(this.events),
+                            dialogs: null
+                        }
+                    });
+                    break;
                 case 'tab-2':
                 case 'tab-3':
                     break;
@@ -275,9 +283,11 @@ export default {
             const btm3 = DOMUtils.DOM.create('a-button', {'v-on:click': `() => {
                 window.alert(JSON.stringify(this.formData));
             }`, type: 'link'}, '获取数据');
+            const btm4 = DOMUtils.DOM.create('a-button', {'v-on:click': 'window.print()', 'v-show': 'printMode', type: 'link'}, '页面打印');
             gbtms.appendChild(btm1);
             gbtms.appendChild(btm2);
             gbtms.appendChild(btm3);
+            gbtms.appendChild(btm4);
             ctx['body'].appendChild(gbtms);
             const content = ctx['body'].innerHTML;
             ctx['body'].innerHTML = '';

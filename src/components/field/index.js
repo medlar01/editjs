@@ -26,9 +26,12 @@ const mixins = () => ({
             handler(n) {
                 if (!n && this.options.nobor) {
                     this.$nextTick(() => {
-                        this.$el.children[0].style.border = '0px';
-                        this.$el.children[0].style['box-shadow'] = 'unset';
-                    })
+                        const child = this.$el.children[0];
+                        if (child) {
+                            child.style.border = '0px';
+                            child.style['box-shadow'] = 'unset';
+                        }
+                    });
                 }
             }
         }
@@ -36,7 +39,7 @@ const mixins = () => ({
 });
 
 const styles = (options) => {
-    return { width: '200px', margin: '0 2px' };
+    return { width: options.width, margin: '0 2px' };
 };
 
 // 预览时存在缓存该组件，所以使用函数每次预览返回一个新的
@@ -45,7 +48,7 @@ export function inputMaker() {
         mixins: [mixins()],
         render() {
             const style = styles(this.options);
-            return this.options.printMode ?
+            return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-input allowClear onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} />);
         }
@@ -58,7 +61,7 @@ export function textareaMaker() {
         render() {
             const style = styles(this.options);
             style['vertical-align'] = 'top';
-            return this.options.printMode ?
+            return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata?.split(/[\s\n]/).map(it => <div>{it}</div>)}</div>) :
                 (<a-textarea allowClear onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} />);
         }
@@ -70,8 +73,8 @@ export function selectMaker() {
         mixins: [mixins()],
         render() {
             const style = styles(this.options);
-            const list = this.options.options?.split(',');
-            return this.options.printMode ?
+            const list = this.options.options?.split(',') || [];
+            return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{list[this.mdata]}</div>) :
                 (<a-select allowClear onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata}>
                     {list.map((val, idx) => (<a-select-option value={idx}>{val}</a-select-option>))}
@@ -85,8 +88,8 @@ export function dateMaker() {
         mixins: [mixins()],
         render() {
             const style = styles(this.options);
-            return this.options.printMode ?
-                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata.format(this.options.format || 'YYYY-MM-DD')}</div>) :
+            return this.options.printMode || this.options.readonly ?
+                (<div style={{ ...style, display: 'inline-block' }}>{this.mdata?.format(this.options.format || 'YYYY-MM-DD')}</div>) :
                 (<a-date-picker onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear v-model={this.mdata} format={this.options.format || 'YYYY-MM-DD'} />);
         }
     }
@@ -97,7 +100,7 @@ export function dialogMaker() {
         mixins: [mixins()],
         render() {
             const style = styles(this.options);
-            return this.options.printMode ?
+            return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-input-search readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear onSearch={() => {
                     alert('还没有实现哦~')

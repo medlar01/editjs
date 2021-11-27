@@ -207,6 +207,7 @@ function makeFieldDialog(vm, edi) {
         onSubmit: (api) => {
             const data = api.getData();
             cachedElement.style.width = data.width;
+            cachedElement.setAttribute('data-mce-style', 'width: ' + data.width);
             delClass(cachedElement.children[0]);
             if (data.hidden) {
                 addClass(cachedElement.children[0], ['iconfont', 'iconhidden-l']);
