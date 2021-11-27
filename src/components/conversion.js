@@ -71,7 +71,7 @@ export default [
                     }
                 }
             }`});
-            div.querySelectorAll('table tr > td > input[type="checkbox"]').forEach((item, idx) => {
+            div.querySelectorAll('table tr > td.checkbox > input[type="checkbox"]').forEach((item, idx) => {
                 item.setAttribute('v-model', 'item.checked');
             });
             gbtm.appendChild(btm2);
