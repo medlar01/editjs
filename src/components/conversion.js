@@ -64,18 +64,16 @@ export default [
             const gbtm = event.target.dom.create('span', {'v-show': '!printMode', style: 'position: absolute; right: 2px; background-color: #e7e7e785'});
             const btm1 = event.target.dom.create('a-icon', {type: 'plus', style: 'margin: 0 5px; color: green; cursor: pointer', 'v-on:click': `formData.${field.name}.push({})`});
             const btm2 = event.target.dom.create('a-icon', {type: 'minus', style: 'margin: 0 5px; color: red; cursor: pointer', 'v-on:click': `(e) => {
-                const getTable = (target) => {
-                    while(target.nodeName !== 'TABLE') {
-                        target = target.parentNode;
+                const data = this.formData.${field.name};
+                for(let i = data.length - 1; i >= 0; i--) {
+                    if (data[i].checked) {
+                        data.splice(i, 1);
                     }
-                    return target;
                 }
-                const cbox = getTable(e.target)
-                    .querySelectorAll('input[type="checkbox"]')
-                    .forEach((item, idx) => {
-                        if (item.checked) this.formData.${field.name}.splice(idx, 1)
-                    });
             }`});
+            div.querySelectorAll('table tr > td > input[type="checkbox"]').forEach((item, idx) => {
+                item.setAttribute('v-model', 'item.checked');
+            });
             gbtm.appendChild(btm2);
             gbtm.appendChild(btm1);
             div.querySelector('table tr > td:last-child')
