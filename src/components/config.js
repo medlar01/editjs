@@ -24,9 +24,10 @@ export default function(vm) {
             }
             .mce-table-line { position: relative; display: block; padding-top: 10px; border: 1px dashed #bbb; min-height: 20px; margin: 2px }
             .mce-table-line::before { content: attr(title); position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 10; font-size: 10px; color: #666666 }
+            .line_field { position: relative }
         `,
         content_css: ['https://cdn.jsdelivr.net/gh/medlar01/tinymce-cdn@5.9.2.4/icons/iconfont/iconfont.css'],
-        extended_valid_elements: 'i[class],span[id|class|style|mce-nobor]',
+        extended_valid_elements: 'i[class],span[id|class|style|mce-nobor],td[*]',
         table_clone_elements: 'strong em b i font h1 h2 h3 h4 h5 h6 p div',
         table_sizing_mode: 'fixed',
         table_default_styles: {
@@ -48,9 +49,10 @@ export default function(vm) {
 }
 
 export const constTableTpl = `
-<table style="width: 939.016px; background-color: white" border="1">
+<table class="line_field" style="width: 939.016px; background-color: white" border="1">
 <thead>
 <tr style="text-align: center;">
+<td v-show="!printMode" class="checkbox" style="width: 20px" scope="col">//</td>
 <td style="width: 220.719px;" scope="col">&nbsp;</td>
 <td style="width: 220.719px;" scope="col">&nbsp;</td>
 <td style="width: 220.719px;" scope="col">&nbsp;</td>
@@ -59,6 +61,7 @@ export const constTableTpl = `
 </thead>
 <tbody>
 <tr class="line_field_row">
+<td v-show="!printMode" class="checkbox" style="width: 20px;"><input type="checkbox"/></td>
 <td style="width: 220.719px;">&nbsp;</td>
 <td style="width: 220.719px;">&nbsp;</td>
 <td style="width: 220.719px;">&nbsp;</td>
@@ -67,6 +70,7 @@ export const constTableTpl = `
 </tbody>
 <tfoot>
 <tr style="background-color: #ecf0f1;">
+<td v-show="!printMode" class="checkbox" style="width: 20px">&nbsp;</td>
 <td style="width: 220.719px;">&nbsp;</td>
 <td style="width: 220.719px;">&nbsp;</td>
 <td style="width: 220.719px;">&nbsp;</td>

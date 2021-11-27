@@ -53,13 +53,33 @@ export default [
         const blocks = DOMUtils.DOM.$('.mce-table-line', ctx['body']);
         const cacheFields = ctx['cacheFields'];
         blocks.each(function (idx, n) {
+            const field = cacheFields[n.id];
             const table = n.querySelector('table');
             table.id = n.id;
             const tr = table.querySelector('tr.line_field_row');
-            tr.setAttribute('v-for', `(item, idx) in formData.${cacheFields[n.id].name}`);
+            tr.setAttribute('v-for', `(item, idx) in formData.${field.name}`);
             tr.setAttribute(':key', `idx`);
-            ctx['data'].formData[cacheFields[n.id].name] = [{}];
+            ctx['data'].formData[field.name] = [];
             const div = event.target.dom.create('div', {}, n.innerHTML);
+            const gbtm = event.target.dom.create('span', {'v-show': '!printMode', style: 'position: absolute; right: 2px; background-color: #e7e7e785'});
+            const btm1 = event.target.dom.create('a-icon', {type: 'plus', style: 'margin: 0 5px; color: green; cursor: pointer', 'v-on:click': `formData.${field.name}.push({})`});
+            const btm2 = event.target.dom.create('a-icon', {type: 'minus', style: 'margin: 0 5px; color: red; cursor: pointer', 'v-on:click': `(e) => {
+                const getTable = (target) => {
+                    while(target.nodeName !== 'TABLE') {
+                        target = target.parentNode;
+                    }
+                    return target;
+                }
+                const cbox = getTable(e.target)
+                    .querySelectorAll('input[type="checkbox"]')
+                    .forEach((item, idx) => {
+                        if (item.checked) this.formData.${field.name}.splice(idx, 1)
+                    });
+            }`});
+            gbtm.appendChild(btm2);
+            gbtm.appendChild(btm1);
+            div.querySelector('table tr > td:last-child')
+                .appendChild(gbtm);
             (n.parentElement || n.parentNode).replaceChild(div, n);
         });
     },
