@@ -1,24 +1,9 @@
-# editjs
-
-## Project setup
+### 项目启动
 ```
 npm install
-```
-
-### Compiles and hot-reloads for development
-```
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### 项目展示
+<img src="https://raw.githubusercontent.com/medlar01/editjs/pages/%7Fimg/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202021-11-27%20233059.png" width="500px" height="300px" />
+<img src="https://raw.githubusercontent.com/medlar01/editjs/pages/%7Fimg/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202021-11-27%20233214.png" width="500px" height="300px" />
