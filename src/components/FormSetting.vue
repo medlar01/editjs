@@ -143,6 +143,8 @@ export default {
             setTimeout(() => {
                 if (key == 'main') {
                     this.tableData = this.data.main.fields;
+                } else if (key == 'dialog') {
+                    alert('该功能暂未实现~')
                 } else {
                     const split = key.split('-');
                     const index = parseInt(split[1]) - 1;
