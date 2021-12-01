@@ -30,7 +30,7 @@
                 </a-layout>
             </a-tab-pane>
             <a-tab-pane key="tab-2" tab="表单设置">
-                <FormSetting :data="data" />
+                <FormSetting :data="data" :dialogs="dialogs" />
             </a-tab-pane>
             <a-tab-pane key="tab-3" tab="行为设置">
                 <BehaviorSetting :events="events" :field-data="data" />
@@ -87,6 +87,12 @@ export default {
             default: ''
         },
         events: {
+            type: Array,
+            default() {
+                return []
+            }
+        },
+        dialogs: {
             type: Array,
             default() {
                 return []
@@ -221,7 +227,7 @@ export default {
                         behavior: {
                             content: this.$refs.tmceInstance.getContent(),
                             events: JSON.stringify(this.events),
-                            dialogs: null
+                            dialogs: JSON.stringify(this.dialogs)
                         }
                     });
                     break;

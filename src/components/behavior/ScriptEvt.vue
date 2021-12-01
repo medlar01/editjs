@@ -36,7 +36,7 @@ export default {
                 },
                 customRender: (value, row, idx) => {
                     return (
-                        <a-select default-value="request" size="small" style="width: 100px; vertical-align: top" v-model={row.exec.type}>
+                        <a-select default-value="request" size="small" style="width: 100px" v-model={row.exec.type}>
                             <a-select-option value="script"> SCRIPT </a-select-option>
                             <a-select-option value="request"> REQUEST </a-select-option>
                         </a-select>
@@ -66,8 +66,7 @@ export default {
                                 </a-select>&nbsp;
                                 <a-input size="small" placeholder="请输入地址" style="width: calc(100% - 105px)" v-model={row.exec.url} />
                                 <br />
-                                <br />
-                                <VueCodemirror v-model={row.exec.value} />
+                                <VueCodemirror style="margin-top: 5px" v-model={row.exec.value} />
                             </span>);
                             break;
                         }

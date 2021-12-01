@@ -28,7 +28,7 @@ export default [
                 nobor: (n.getAttribute('mce-nobor') == 'true' || false),
                 width: style.width
             };
-            if (field.category == 'select') {
+            if (field.category == 'select' || field.category == 'dialog') {
                 opt['options'] = field.options;
             }
             if (field.category == 'date') {
@@ -78,6 +78,8 @@ export default [
             gbtm.appendChild(btm1);
             div.querySelector('table tr > td:last-child')
                 .appendChild(gbtm);
+            const tbody = div.querySelector('table > tbody');
+            tbody.setAttribute('v-show', `formData.${field.name}.length > 0`);
             (n.parentElement || n.parentNode).replaceChild(div, n);
         });
     },

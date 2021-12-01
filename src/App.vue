@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <Editjs v-if="ready" :data="mock" :content="context" :events="events" @save="save" />
+        <Editjs v-if="ready" :data="mock" :content="context" :events="events" :dialogs="dialogs" @save="save" />
     </div>
 </template>
 
@@ -20,6 +20,7 @@ export default {
     data() {
         return {
             events: [],
+            dialogs: [],
             context: '',
             ready: false,
             mock: null
@@ -30,7 +31,8 @@ export default {
             .then(res => {
                 if (res.status == 200) {
                     this.mock = res.data.tableInfo;
-                    this.events = JSON.parse(res.data.behavior.events.replaceAll('\\\\n', '\\n'));
+                    this.events = JSON.parse((res.data.behavior.events||"[]").replaceAll('\\\\n', '\\n'));
+                    this.dialogs = JSON.parse((res.data.behavior.dialogs||"[]").replaceAll('\\\\n', '\\n'));
                     this.context = res.data.behavior.content;
                     this.ready = true;
                 }
@@ -38,9 +40,12 @@ export default {
     },
     methods: {
         save(data) {
-            console.log("save data", data);
             axios.put(baseUrl + '/editjs/mata-info/save/b3009f91-4b97-11ec-8fd2-b42e99147792/node-b11aw23h0', data).then(res => {
-                console.log('res', res);
+                if (res.status == 200) {
+                    this.$message.info('保存成功~');
+                } else {
+                    this.$message.error('保存失败~');
+                }
             });
         }
     }

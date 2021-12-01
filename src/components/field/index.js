@@ -95,16 +95,73 @@ export function dateMaker() {
     }
 }
 
+function searchModalMaker() {
+    return {
+        props: ['id', 'visible'],
+        model: {
+            event: 'change',
+            prop: 'visible'
+        },
+        data() {
+            return {
+                code: null,
+                name: null
+            }
+        },
+        render() {
+            return (<a-modal title="弹窗选项" visible={this.visible} onCancel={() => this.$emit('change', false)} onOk={this.ok} bodyStyle={{padding: '0'}} footer={null}>
+                <div>
+                    <div style="text-align: right; padding: 2px 10px 2px">
+                        <a-input v-model={this.code} placeholder="编码" size="small" style="width: 120px; margin: 0 5px"/>
+                        <a-input v-model={this.name} placeholder="名称" size="small" style="width: 120px; margin: 0 5px"/>
+                        <a-button icon="search" type="dashed" shape="round" size="small"/>
+                    </div>
+                    <a-table row-key="id" data-source={this.dialogs} size="middle"
+                    customRow={(record) => ({ on: {
+                        dblclick: () => {
+                            this.$emit('select', record)
+                            this.$emit('change', false)
+                        }
+                    }})}
+                    columns={[
+                        {
+                            dataIndex: 'code',
+                            title: '编码',
+                            width: '30%',
+                            align: 'center'
+                        }, {
+                            dataIndex: 'name',
+                            title: '名称',
+                            width: '30%',
+                            align: 'center'
+                        }, {
+                            dataIndex: 'desc',
+                            title: '描述',
+                            width: '40%',
+                            align: 'center'
+                        }
+                    ]}/>
+                </div>
+            </a-modal>);
+        }
+    }
+}
+
 export function dialogMaker() {
     return {
         mixins: [mixins()],
+        data() {
+            return { visible: false }
+        },
         render() {
             const style = styles(this.options);
+            const SearchModal = searchModalMaker();
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
-                (<a-input-search readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear onSearch={() => {
-                    alert('还没有实现哦~')
-                }} />);
+                (<span>
+                    <a-input-search readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear onSearch={() => this.visible = true } />
+                    <SearchModal id={this.options.options} v-model={this.visible} />
+                </span>);
         }
     }
 }
