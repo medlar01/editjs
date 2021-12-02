@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import dedent from 'dedent'
 import VueCodemirror from "./VueCodemirror.vue"
 import { unique } from '@/utils/common'
 const nameMaps = { input: '文本', textarea: '文本域', number: '数值', date: '日期', select: '下拉', dialog: '弹窗' };
@@ -153,7 +154,13 @@ const DialogEditCell = {
                 if (!this.row.api.params) {
                     this.$set(this.row.api, 'params', [{}])
                 }
-                this.row.api.value  = this.row.api.value || '// 请编写请求头信息';
+                this.row.api.config  = this.row.api.config || dedent`// 请编写请求头信息
+                    {
+                        headers: [
+                            
+                        ]
+                    }
+                `;
                 const paramList = this.row.api.params;
                 const paramsSlot = (<div>
                     {paramList.map((it, idx) => (<div>

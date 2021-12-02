@@ -7,7 +7,7 @@
 <script>
 import axios from 'axios'
 import Editjs from "./components/Editjs.vue"
-
+import '@/mock'
 const baseUrl = process.env.NODE_ENV == 'production' ?
     'http://114.132.201.94:80' : '/bapi'
 axios.defaults.baseURL = baseUrl

@@ -104,7 +104,7 @@ export function dateMaker() {
 
 function searchModalMaker() {
     return {
-        props: ['id', 'visible'],
+        props: ['id', 'idx', 'visible'],
         model: {
             event: 'change',
             prop: 'visible'
@@ -166,36 +166,15 @@ function searchModalMaker() {
                 if (res.status == 200) {
                     this.option = res.data
                 }
-            });
+            }).then(() => this.search(this.page));
         },
         methods: {
             search(pagination) {
-                const { type, api } = this.option;
+                const { type, api, sql } = this.option;
                 if (type == 'api') {
-                    const conv = (params, vm) => {
-                        const data = {}
-                        params.map(param => {
-                            if (/^[$].+[$]$/.test(param.value)) {
-                                const value = param.value.substr(1, param.value.length - 2)
-                                data[param.key] = vm.$refs[value].mdata
-                            }
-                        })
-                        return data
-                    }
-                    let config = (api.config||"")
-                        .replace(/(?:^|\n|\r)\s*\/\*[\s\S]*?\*\/\s*(?:\r|\n|$)/g, '\n')
-                        .replace(/(?:^|\n|\r)\s*\/\/.*(?:\r|\n|$)/g, '\n')
-                        .replace(/\n/g, '')
-                    config = eval(`() => { return ${config} }`)()
-                    axios[api.method](api.url, {...conv(api.params,  this.vm), searchCode: this.code, searchName: this.name, ...pagination}, config).then(res => {
-                        if (res.status == 200) {
-                            this.data = res.data.list
-                            this.page.total = res.data.total
-                            this.page.current = pagination.current
-                        }
-                    })
+                    execApi.bind(this, api, pagination)()
                 } else {
-                    alert(type + ' 方式未实现~')
+                    execSql.bind(this, sql, pagination)()
                 }
             }
         }
@@ -216,7 +195,7 @@ export function dialogMaker() {
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<span>
                     <a-input-search v-model={this.mdata} readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear onSearch={() => this.visible = true } />
-                    {this.visible ? (<SearchModal id={this.options.options.dialog.id} v-model={this.visible} onSelect={(record) => {
+                    {this.visible ? (<SearchModal id={this.options.options.dialog.id} idx={this.$attrs.idx} v-model={this.visible} onSelect={(record) => {
                         this.vm.cached = record
                         this.mdata = record.code
                      }}/>) : null}
@@ -234,4 +213,83 @@ function $blur(vm, cb) {
             (cb || Fn)(e);
         }
     }
+}
+
+function execApi(api, pagination) {
+    const conv = (params, vm) => {
+        const data = {}
+        params.map(param => {
+            if (/^[$].+[$]$/.test(param.value)) {
+                let value = param.value.substr(1, param.value.length - 2)
+                if (value.endsWith("[idx]")) {
+                    value = value.replace(/\[idx\]$/, this.idx)
+                }
+                const ref = vm.$refs[value]
+                data[param.key] = Array.isArray(ref) ? ref[0].mdata : ref.mdata
+            } else {
+                data[param.key] = param.value
+            }
+        })
+        return api.method == 'get' ? { params: data } : data
+    }
+    let config = (api.config||"")
+        .replace(/(?:^|\n|\r)\s*\/\*[\s\S]*?\*\/\s*(?:\r|\n|$)/g, '\n')
+        .replace(/(?:^|\n|\r)\s*\/\/.*(?:\r|\n|$)/g, '\n')
+        .replace(/\n/g, '')
+    config = eval(`() => { return ${config} }`)()
+    axios[api.method](api.url, {...conv(api.params,  this.vm), searchCode: this.code, searchName: this.name, ...pagination}, config).then(res => {
+        if (res.status == 200) {
+            const page = {...pagination}
+            page.total = res.data.total
+            this.data = res.data.list
+            this.page = page
+        }
+    })
+}
+
+function execSql(sql, pagination) {
+    // 解析参数
+    const list = sql.match(/[$][^$]+[$]/g)
+    const params = list.map(it => {
+        let result = ""
+        let value = it.substr(1, it.length - 2)
+        let leftLike = false
+        let rightLike = false
+        if (value.startsWith('%')) {
+            leftLike = true
+            value = value.substr(1)
+        }
+        if (value.endsWith('%')) {
+            rightLike = true
+            value = value.substr(0, value.length - 1)
+        }
+        if (value.endsWith("[idx]")) {
+            value = value.replace(/\[idx\]$/, this.idx)
+        }
+        const ref = this.vm.$refs[value]
+        if (ref) {
+            result = Array.isArray(ref) ? ref[0].mdata : ref.mdata
+        } else {
+            switch(value) {
+                case "searchCode": {
+                    result = (leftLike ? '%': '') + (this.code||'') + (rightLike ? '%': '')
+                    break
+                }
+                case "searchName": {
+                    result = (leftLike ? '%': '') + (this.name||'') + (rightLike ? '%': '')
+                    break
+                }
+            }
+        }
+        return result
+    }).join(' , ')
+    console.log("sql", sql, params);
+    axios.post(`/editjs/execSql/${this.id}`, {params, ...pagination}).then(res => {
+        if (res.status == 200) {
+            const page = {...pagination}
+            page.total = res.data.total
+            this.data = res.data.list
+            this.page = page
+        }
+    })
 }

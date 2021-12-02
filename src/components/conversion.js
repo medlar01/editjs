@@ -49,7 +49,7 @@ export default [
                 (n.parentElement || n.parentNode).replaceChild(input, n);
                 ctx['data'].formData[field.name] = null;
             } else {
-                const input = event.target.dom.create('f-' + field.category, { ':id': `'${n.id}_' + idx`, ':ref': `'${n.id}-' + idx`, 'v-model': `item.${field.name}`, ':options': optionString });
+                const input = event.target.dom.create('f-' + field.category, { ':id': `'${n.id}_' + idx`, ':ref': `'${n.id}-' + idx`, ':idx': 'idx', 'v-model': `item.${field.name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
             }
         });
