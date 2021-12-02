@@ -332,6 +332,7 @@ export default {
                         data: ${JSON.stringify(ctx['data'], null, 4).replace(/"moment": "([^"]+)"/g, 'moment: $1')},
                         template: \`<div>${content}</div>\`,
                         components: components,
+                        provide() { return {vm: this} },
                         methods: {
                             ${Object.keys(metds).map(key => key + metds[key] + ' ')}
                         }
@@ -391,6 +392,7 @@ function g_plugin(vm, edi) {
             const html = prettier.format(`<template>${content}</template><script>export default {
                     props: ${JSON.stringify(ctx['props'], null, 4).replace(/"type": "([^"]+)"/g, 'type: $1')},
                     data() { return ${JSON.stringify(ctx['data'], null, 4).replace(/"moment": "([^"]+)"/g, 'moment: $1')} }, 
+                    provide() { return {vm: this} },
                     methods: { ${Object.keys(metds).map(key => key + metds[key] + ' ')} }
                 }${'</'}script>`, {
                 parser: 'vue',

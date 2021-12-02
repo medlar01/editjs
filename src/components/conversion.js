@@ -1,7 +1,9 @@
 export default [
     function (vm, event, ctx) { // 转换field
         event.target.StyleUtils = new event.target.editorManager.resolve('tinymce.html.Styles')({})
-        ctx['data'] = {};
+        ctx['data'] = {
+            cached: null
+        };
         ctx['props'] = {
             printMode: {
                 type: 'Boolean',
@@ -28,8 +30,13 @@ export default [
                 nobor: (n.getAttribute('mce-nobor') == 'true' || false),
                 width: style.width
             };
-            if (field.category == 'select' || field.category == 'dialog') {
+            if (field.category == 'select') {
                 opt['options'] = field.options;
+            }
+            if (field.category == 'dialog') {
+                opt['options'] = {
+                    dialog: field.options,
+                }
             }
             if (field.category == 'date') {
                 opt['format'] = field.format;
@@ -38,11 +45,11 @@ export default [
             const optionString = JSON.stringify(opt, null, 4)
                 .replace(/"printMode": "([^"]+)"/g, 'printMode: $1');
             if (!n.classList.contains('tl')) {
-                const input = event.target.dom.create('f-' + field.category, { id: n.id, 'v-model': `formData.${field.name}`, ':options': optionString });
+                const input = event.target.dom.create('f-' + field.category, { id: n.id, ref: n.id, 'v-model': `formData.${field.name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
                 ctx['data'].formData[field.name] = null;
             } else {
-                const input = event.target.dom.create('f-' + field.category, { ':id': `'${n.id}_' + idx`, 'v-model': `item.${field.name}`, ':options': optionString });
+                const input = event.target.dom.create('f-' + field.category, { ':id': `'${n.id}_' + idx`, ':ref': `'${n.id}-' + idx`, 'v-model': `item.${field.name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
             }
         });

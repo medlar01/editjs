@@ -180,6 +180,13 @@ function makeFieldDialog(vm, edi) {
                     type: 'grid',
                     columns: 2,
                     items: [
+                        { type: 'input', name: 'id', label: 'id' }
+                    ]
+                },
+                {
+                    type: 'grid',
+                    columns: 2,
+                    items: [
                         { type: 'input', name: 'width', label: 'width' }
                     ]
                 },
@@ -230,6 +237,7 @@ function makeFieldDialog(vm, edi) {
         const style = currNode.style;
         pannelArgs['title'] = `字段：${currNode.innerText}`
         pannelArgs['initialData'] = {
+            id: field.id,
             width: style.width,
             category: field.category,
             hidden: currNode.children[0].classList.contains('iconhidden-l'),

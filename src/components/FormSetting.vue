@@ -87,11 +87,15 @@ const ApiSqlModal = {
                     {
                         dataIndex: 'id',
                         title: 'ID',
-                        width: '50%'
+                        width: '30%'
                     }, {
                         dataIndex: 'type',
                         title: '类别',
-                        width: '50%'
+                        width: '30%'
+                    }, {
+                        dataIndex: 'name',
+                        title: '键名',
+                        width: '40%'
                     }
                 ]}/>
             </div>
@@ -122,8 +126,13 @@ const EditCell = {
             }
             case "dialog": {
                 slot = (<span>
-                    <a-input-search size="small" readOnly style="width: 200px" v-model={this.row.options} placeholder="请选择弹窗选项" onSearch={() => this.visible = true}/>
-                    <ApiSqlModal dialogs={this.dialogs} v-model={this.visible} onSelect={(record) => this.row.options = record.id } />
+                    <a-input-search size="small" readOnly style="width: 200px" v-model={this.row.options.name} placeholder="请选择弹窗选项" onSearch={() => this.visible = true}/>
+                    <ApiSqlModal dialogs={this.dialogs} v-model={this.visible} onSelect={(record) => {
+                        this.row.options = {
+                            id: record.id,
+                            name: record.name
+                        }
+                    } } />
                 </span>);
                 break;
             }
@@ -165,7 +174,7 @@ const DialogEditCell = {
                     </a-select>&nbsp;
                     <a-input size="small" placeholder="请输入地址" style="width: calc(100% - 105px)" v-model={this.row.api.url} />
                     <br />
-                    <VueCodemirror style="margin: 5px 0" v-model={this.row.api.value} />
+                    <VueCodemirror style="margin: 5px 0" v-model={this.row.api.config} />
                     {paramsSlot}
                 </span>);
             }
@@ -238,12 +247,25 @@ export default {
             dialogColumns: [
                 {
                     width: 120,
-                    title: '键名',
+                    title: 'ID',
                     dataIndex: 'id',
                     customCell: () => {
                         return {
                             style: 'vertical-align: top'
                         }
+                    }
+                },
+                {
+                    width: 160,
+                    title: '键名',
+                    dataIndex: 'name',
+                    customCell: () => {
+                        return {
+                            style: 'vertical-align: top'
+                        }
+                    },
+                    customRender: (val, row) => {
+                        return (<a-input v-model={row.name} size="small" placeholder="请输入键名" />);
                     }
                 },
                 {

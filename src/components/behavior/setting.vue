@@ -3,8 +3,11 @@
         <a-layout-sider :width="260">
             <a-menu @select="onSelectMenu" mode="inline" :default-selected-keys="[0]">
                 <a-menu-item :title="event.field.comment" v-for="(event, index) in events" :key="index">
-                    <a-icon type="tags" />
-                    <span class="nav-text">{{event.field.comment}}</span>
+                    <div style="position: relative">
+                        <a-icon type="tags" />
+                        <span>{{event.field.comment}}</span>
+                        <a-icon class="close-memu" type="close" style="position: absolute; left: -22px; top: 4px; font-size: 12px" @click.stop="closeMemu(event, index)" />
+                    </div>
                 </a-menu-item>
             </a-menu>
             <div class="toolbar">
@@ -13,7 +16,7 @@
                 </a-button>
             </div>
         </a-layout-sider>
-        <a-layout-content style="padding: 20px">
+        <a-layout-content style="padding: 20px" v-if="currEvent != null">
             <a-card v-for="(item, key) in currEvent.events" :title="'事件：' + key" size="small" type="inner" :key="key" style="margin-bottom: 10px">
                 <a slot="extra" href="#" @click="$delete(currEvent.events, key)"><a-icon type="close" /></a>
                 <ConstEvt v-if="item.bus == 'default'" :actions="item.action" :field-data="fieldData" />
@@ -165,6 +168,12 @@ export default {
         this.currEvent = this.events[0];
     },
     methods: {
+        closeMemu(event, index) {
+            this.events.splice(index, 1)
+            if (this.currEvent == event) {
+                this.currEvent = null;
+            }
+        },
         onSelectMenu({item, key}) {
             this.currEvent = this.events[key];
         },
@@ -178,6 +187,9 @@ export default {
                     },
                     events: {}
                 });
+                if (this.currEvent == null) {
+                    this.currEvent = this.events[this.events.length - 1]
+                }
             }
         },
         addEvent(data) {
@@ -205,6 +217,10 @@ function $beginUpperCase(val) {
         > button {
             width: 150px;
         }
+    }
+    .close-memu:hover {
+        // background-color: #d1d1d187;
+        color: red;
     }
 }
 </style>

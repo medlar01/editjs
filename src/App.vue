@@ -9,7 +9,8 @@ import axios from 'axios'
 import Editjs from "./components/Editjs.vue"
 
 const baseUrl = process.env.NODE_ENV == 'production' ?
-    'http://114.132.201.94:8081' : '/bapi'
+    'http://114.132.201.94:80' : '/bapi'
+axios.defaults.baseURL = baseUrl
 
 export default {
     name: 'App',
@@ -27,7 +28,9 @@ export default {
         }
     },
     created() {
-        axios.get(baseUrl + '/editjs/mata-info/b3009f91-4b97-11ec-8fd2-b42e99147792/node-b11aw23h0')
+        this.$cookies.set('act-id', 'b3009f91-4b97-11ec-8fd2-b42e99147792');
+        this.$cookies.set('node-id', 'node-b11aw23h0');
+        axios.get('/editjs/mata-info/b3009f91-4b97-11ec-8fd2-b42e99147792/node-b11aw23h0')
             .then(res => {
                 if (res.status == 200) {
                     this.mock = res.data.tableInfo;
@@ -40,7 +43,7 @@ export default {
     },
     methods: {
         save(data) {
-            axios.put(baseUrl + '/editjs/mata-info/save/b3009f91-4b97-11ec-8fd2-b42e99147792/node-b11aw23h0', data).then(res => {
+            axios.put('/editjs/mata-info/save/b3009f91-4b97-11ec-8fd2-b42e99147792/node-b11aw23h0', data).then(res => {
                 if (res.status == 200) {
                     this.$message.info('保存成功~');
                 } else {
