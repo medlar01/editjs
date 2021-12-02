@@ -1,7 +1,7 @@
 <template>
     <div>
-        <a-table :columns="columns" :data-source="actions" bordered rowKey="id" size="middle" :pagination="false" style="margin-bottom: 10px"/>
-        <a-button style="float: right" type="dashed" shape="round" size="small" icon="edit" @click="visible = true">
+        <a-table :columns="columns" :data-source="actions" rowKey="id" size="middle" :pagination="false" style="margin-bottom: 10px"/>
+        <a-button style="float: right; margin: 0 20px 5px" type="dashed" shape="round" size="small" icon="edit" @click="visible = true">
             添加
         </a-button>
         <FieldModal v-model="visible" :field-data="fieldData" @ok="(val) => {
