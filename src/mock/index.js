@@ -1,6 +1,7 @@
 import Mockjs from 'mockjs'
-
-Mockjs.mock('/bapi/editjs/example/emp', 'post', (config) => {
+const baseUrl = process.env.NODE_ENV == 'production' ?
+    '' : '/bapi'
+Mockjs.mock(baseUrl + '/editjs/example/emp', 'post', (config) => {
     console.log('mock.config', config);
     return {
         total: 2,
@@ -19,7 +20,7 @@ Mockjs.mock('/bapi/editjs/example/emp', 'post', (config) => {
     }
 })
 
-Mockjs.mock('/bapi/editjs/example/dept', 'post', (config) => {
+Mockjs.mock(baseUrl + '/editjs/example/dept', 'post', (config) => {
     console.log('mock.config', config);
     let list = [
             { "code": "C01", "name": "财务一部", "desc": "管账的..." },
@@ -51,7 +52,7 @@ Mockjs.mock('/bapi/editjs/example/dept', 'post', (config) => {
     return result
 })
 
-Mockjs.mock(RegExp('/bapi/editjs/example/itemtype[?]{0,1}[^?]*'), 'get', (config) => { 
+Mockjs.mock(RegExp(baseUrl + '/editjs/example/itemtype[?]{0,1}[^?]*'), 'get', (config) => { 
     console.log('mock.config', config);
     return {
         total: 3,
