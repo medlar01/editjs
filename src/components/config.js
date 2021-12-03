@@ -52,29 +52,29 @@ export const constTableTpl = `
 <table class="line_field" style="width: 939.016px; background-color: white" border="1">
 <thead>
 <tr style="text-align: center;">
-<td v-show="!printMode" class="checkbox" style="width: 20px" scope="col">//</td>
-<td style="width: 220.719px;" scope="col">&nbsp;</td>
-<td style="width: 220.719px;" scope="col">&nbsp;</td>
-<td style="width: 220.719px;" scope="col">&nbsp;</td>
-<td style="width: 220.734px;" scope="col">&nbsp;</td>
+<td v-if="!printMode" class="checkbox" style="width: 20px" scope="col">//</td>
+<td style="width: 220.719px;" scope="col"></td>
+<td style="width: 220.719px;" scope="col"></td>
+<td style="width: 220.719px;" scope="col"></td>
+<td style="width: 220.734px;" scope="col"></td>
 </tr>
 </thead>
 <tbody>
 <tr class="line_field_row">
-<td v-show="!printMode" class="checkbox" style="width: 20px;"><input type="checkbox"/></td>
-<td style="width: 220.719px;">&nbsp;</td>
-<td style="width: 220.719px;">&nbsp;</td>
-<td style="width: 220.719px;">&nbsp;</td>
-<td style="width: 220.734px;">&nbsp;</td>
+<td v-if="!printMode" class="checkbox" style="width: 20px;"><input type="checkbox"/></td>
+<td style="width: 220.719px;"></td>
+<td style="width: 220.719px;"></td>
+<td style="width: 220.719px;"></td>
+<td style="width: 220.734px;"></td>
 </tr>
 </tbody>
 <tfoot>
 <tr style="background-color: #ecf0f1;">
-<td v-show="!printMode" class="checkbox" style="width: 20px">&nbsp;</td>
-<td style="width: 220.719px;">&nbsp;</td>
-<td style="width: 220.719px;">&nbsp;</td>
-<td style="width: 220.719px;">&nbsp;</td>
-<td style="width: 220.734px;">&nbsp;</td>
+<td v-if="!printMode" class="checkbox" style="width: 20px"></td>
+<td style="width: 220.719px;"></td>
+<td style="width: 220.719px;"></td>
+<td style="width: 220.719px;"></td>
+<td style="width: 220.734px;"></td>
 </tr>
 </tfoot>
 </table>
