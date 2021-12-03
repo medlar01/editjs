@@ -192,16 +192,19 @@ function makeFieldDialog(vm, edi) {
                 },
                 {
                     type: 'grid',
-                    columns: 3,
+                    columns: 4,
                     items: [
-                        { type: 'label', label: '无边框', items: [
-                            { type: 'checkbox', name: 'nobor', label: '消除框边线' }
+                        { type: 'label', label: '边框', items: [
+                            { type: 'checkbox', name: 'nobor', label: '无框边线' }
                         ]},
                         { type: 'label', label: '隐藏', items: [
-                            { type: 'checkbox', name: 'hidden', label: '字段不可见' }
+                            { type: 'checkbox', name: 'hidden', label: '字段隐藏' }
                         ]},
                         { type: 'label', label: '只读', items: [
-                            { type: 'checkbox', name: 'readonly', label: '字段不可编辑' }
+                            { type: 'checkbox', name: 'readonly', label: '字段只读' }
+                        ]},
+                        { type: 'label', label: '校验', items: [
+                            { type: 'checkbox', name: 'required', label: '字段必填' }
                         ]}
                     ]
                 }
@@ -225,6 +228,7 @@ function makeFieldDialog(vm, edi) {
                 addClass(cachedElement.children[0], ['iconfont', 'iconedit']);
             }
             cachedElement.setAttribute('mce-nobor', data.nobor);
+            cachedElement.setAttribute('mce-required', data.required);
             api.close();
         }
     };
@@ -242,7 +246,8 @@ function makeFieldDialog(vm, edi) {
             category: field.category,
             hidden: currNode.children[0].classList.contains('iconhidden-l'),
             readonly: currNode.children[0].classList.contains('iconread-only'),
-            nobor: (currNode.getAttribute('mce-nobor') == 'true' || false)
+            nobor: (currNode.getAttribute('mce-nobor') == 'true' || false),
+            required: (currNode.getAttribute('mce-required') == 'true' || false),
         };
         cachedElement = currNode;
         edi.windowManager.open(pannelArgs);

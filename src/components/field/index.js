@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { validationMixin } from 'vuelidate'
+import { required } from 'vuelidate/lib/validators'
 
 const mixins = () => ({
     props: ['value', 'options'],
@@ -60,52 +62,124 @@ const styles = (options, megex = {}) => {
 // 预览时存在缓存该组件，所以使用函数每次预览返回一个新的
 export function inputMaker() {
     return {
-        mixins: [mixins()],
+        mixins: [mixins(), validationMixin],
+        validations: {
+            mdata: { required }
+        },
+        data() {
+            return { error: false }
+        },
         render() {
             const style = styles(this.options);
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
-                (<a-input onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请输入..." />);
+                (<a-tooltip title="请输入必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
+                    {this.options.required ? '❗' : null}
+                    <a-input onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请输入..." />
+                </a-tooltip>);
+        },
+        methods: {
+            touch() {
+                if (this.$v && this.options.required) {
+                    this.$v.mdata.$touch();
+                    this.error = this.$v.mdata.$error;
+                    return this.error;
+                } else return false
+            }
         }
     }
 }
 
 export function textareaMaker() {
     return {
-        mixins: [mixins()],
+        mixins: [mixins(), validationMixin],
+        validations: {
+            mdata: { required }
+        },
+        data() {
+            return { error: false }
+        },
         render() {
             const style = styles(this.options, { padding: '4px 7px' });
             style['vertical-align'] = 'top';
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata?.split(/[\s\n]/).map(it => <div>{it}</div>)}</div>) :
-                (<a-textarea style="padding: 4px 7px" onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请输入..." />);
+                (<a-tooltip title="请输入必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
+                    {this.options.required ? '❗' : null}
+                    <a-textarea style="padding: 4px 7px" onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请输入..." />
+                </a-tooltip>);
+        },
+        methods: {
+            touch() {
+                if (this.$v && this.options.required) {
+                    this.$v.mdata.$touch();
+                    this.error = this.$v.mdata.$error;
+                    return this.error;
+                } else return false
+            }
         }
     }
 }
 
 export function selectMaker() {
     return {
-        mixins: [mixins()],
+        mixins: [mixins(), validationMixin],
+        validations: {
+            mdata: { required }
+        },
+        data() {
+            return { error: false }
+        },
         render() {
             const style = styles(this.options);
             const list = this.options.options?.split(',') || [];
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{list[this.mdata]}</div>) :
-                (<a-select allowClear onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请选择...">
-                    {list.map((val, idx) => (<a-select-option value={idx}>{val}</a-select-option>))}
-                </a-select>);
+                (<a-tooltip title="请选择必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
+                    {this.options.required ? '❗' : null}
+                    <a-select allowClear onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请选择...">
+                        {list.map((val, idx) => (<a-select-option value={idx}>{val}</a-select-option>))}
+                    </a-select>
+                </a-tooltip>);
+        },
+        methods: {
+            touch() {
+                if (this.$v && this.options.required) {
+                    this.$v.mdata.$touch();
+                    this.error = this.$v.mdata.$error;
+                    return this.error;
+                } else return false
+            }
         }
     }
 }
 
 export function dateMaker() {
     return {
-        mixins: [mixins()],
+        mixins: [mixins(), validationMixin],
+        validations: {
+            mdata: { required }
+        },
+        data() {
+            return { error: false }
+        },
         render() {
             const style = styles(this.options);
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
-                (<a-date-picker onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear v-model={this.mdata} format={this.options.format || 'YYYY-MM-DD'} placeholder="请选择..."/>);
+                (<a-tooltip title="请选择必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
+                    {this.options.required ? '❗' : null}
+                    <a-date-picker onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear v-model={this.mdata} format={this.options.format || 'YYYY-MM-DD'} placeholder="请选择..."/>
+                </a-tooltip>);
+        },
+        methods: {
+            touch() {
+                if (this.$v && this.options.required) {
+                    this.$v.mdata.$touch();
+                    this.error = this.$v.mdata.$error;
+                    return this.error;
+                } else return false
+            }
         }
     }
 }
@@ -191,9 +265,12 @@ function searchModalMaker() {
 
 export function dialogMaker() {
     return {
-        mixins: [mixins()],
+        mixins: [mixins(), validationMixin],
+        validations: {
+            mdata: { required }
+        },
         data() {
-            return { visible: false }
+            return { visible: false, error: false }
         },
         inject: ['vm'],
         render() {
@@ -202,23 +279,37 @@ export function dialogMaker() {
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<span>
-                    <a-input-search v-model={this.mdata} readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear onSearch={() => this.visible = true } placeholder="请选择..."/>
-                    {this.visible ? (<SearchModal id={this.options.options.dialog.id} idx={this.$attrs.idx} v-model={this.visible} onSelect={(record) => {
-                        this.vm.cached = record
-                        this.mdata = record.code
-                     }}/>) : null}
+                    <a-tooltip title="请选择必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
+                        {this.options.required ? '❗' : null}
+                        <a-input-search v-model={this.mdata} readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear onSearch={() => this.visible = true } placeholder="请选择..."/>
+                        {this.visible ? (<SearchModal id={this.options.options.dialog.id} idx={this.$attrs.idx} v-model={this.visible} onSelect={(record) => {
+                            this.vm.cached = record
+                            this.mdata = record.code
+                            this.touch()
+                        }}/>) : null}
+                    </a-tooltip>
                 </span>);
+        },
+        methods: {
+            touch() {
+                if (this.$v && this.options.required) {
+                    this.$v.mdata.$touch();
+                    this.error = this.$v.mdata.$error;
+                    return this.error;
+                } else return false
+            }
         }
     }
 }
 
-const Fn = () => { }
-function $blur(vm, cb) {
+const fn = () => { }
+function $blur(vm, callback = fn) {
     var old = null;
     return function (e) {
         if (old != vm.mdata) {
             old = vm.mdata;
-            (cb || Fn)(e);
+            vm.touch();
+            callback(e);
         }
     }
 }
@@ -291,7 +382,6 @@ function execSql(sql, pagination) {
         }
         return result
     });
-    console.log("sql", sql, params);
     axios.post(`/editjs/execSql/${this.id}`, {params, ...pagination}).then(res => {
         if (res.status == 200) {
             const page = {...pagination}

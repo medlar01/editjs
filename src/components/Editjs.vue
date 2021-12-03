@@ -287,7 +287,9 @@ export default {
             const btm1 = DOMUtils.DOM.create('a-button', {'v-on:click': 'printMode = false','v-show': 'printMode', type: 'link'}, '编辑模式');
             const btm2 = DOMUtils.DOM.create('a-button', {'v-on:click': 'printMode = true', 'v-show': '!printMode', type: 'link'}, '打印模式');
             const btm3 = DOMUtils.DOM.create('a-button', {'v-on:click': `() => {
-                window.alert(JSON.stringify(this.formData));
+                if (!this.validation()) {
+                    setTimeout(() => alert(JSON.stringify(this.form)), 100)
+                }
             }`, type: 'link'}, '获取数据');
             const btm4 = DOMUtils.DOM.create('a-button', {'v-on:click': 'window.print()', 'v-show': 'printMode', type: 'link'}, '页面打印');
             gbtms.appendChild(btm1);

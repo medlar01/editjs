@@ -21,7 +21,8 @@
     "save-dev": "0.0.1-security",
     "vue": "^2.6.11",
     "vue-codemirror": "^4.0.6",
-    "vue-cookies": "^1.7.4"
+    "vue-cookies": "^1.7.4",
+    "vuelidate": "^0.7.6"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

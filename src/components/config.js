@@ -27,7 +27,7 @@ export default function(vm) {
             .line_field { position: relative }
         `,
         content_css: ['https://cdn.jsdelivr.net/gh/medlar01/tinymce-cdn@5.9.2.4/icons/iconfont/iconfont.css'],
-        extended_valid_elements: 'i[class],span[id|class|style|mce-nobor],td[*]',
+        extended_valid_elements: 'i[class],span[id|class|style|mce-nobor|mce-required],td[*]',
         table_clone_elements: 'strong em b i font h1 h2 h3 h4 h5 h6 p div',
         table_sizing_mode: 'fixed',
         table_default_styles: {

@@ -10,10 +10,12 @@ export default [
                 default: false
             }
         };
-        ctx['body'] = event.target.dom.create('body', {}, event.content);
+        ctx['body'] = event.target.dom.create('body', {});
+        const form = event.target.dom.create('a-form', {}, event.content);
+        ctx['body'].appendChild(form);
         const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-field', ctx['body']);
-        if (!ctx['data'].formData) ctx['data'].formData = {};
+        if (!ctx['data'].form) ctx['data'].form = {};
 
         const cacheFields = {};
         [...vm.data.main.fields, ...[].concat(...vm.data.lines.map(it => it.fields),
@@ -28,6 +30,7 @@ export default [
                 hidden: n.children[0].classList.contains('iconhidden-l'),
                 readonly: n.children[0].classList.contains('iconread-only'),
                 nobor: (n.getAttribute('mce-nobor') == 'true' || false),
+                required: (n.getAttribute('mce-required') == 'true' || false),
                 width: style.width
             };
             if (field.category == 'select') {
@@ -45,9 +48,9 @@ export default [
             const optionString = JSON.stringify(opt, null, 4)
                 .replace(/"printMode": "([^"]+)"/g, 'printMode: $1');
             if (!n.classList.contains('tl')) {
-                const input = event.target.dom.create('f-' + field.category, { id: n.id, ref: n.id, 'v-model': `formData.${field.name}`, ':options': optionString });
+                const input = event.target.dom.create('f-' + field.category, { id: n.id, ref: n.id, 'v-model': `form.${field.name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
-                ctx['data'].formData[field.name] = null;
+                ctx['data'].form[field.name] = null;
             } else {
                 const input = event.target.dom.create('f-' + field.category, { ':id': `'${n.id}_' + idx`, ':ref': `'${n.id}-' + idx`, ':idx': 'idx', 'v-model': `item.${field.name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
@@ -64,14 +67,14 @@ export default [
             const table = n.querySelector('table');
             table.id = n.id;
             const tr = table.querySelector('tr.line_field_row');
-            tr.setAttribute('v-for', `(item, idx) in formData.${field.name}`);
+            tr.setAttribute('v-for', `(item, idx) in form.${field.name}`);
             tr.setAttribute(':key', `idx`);
-            ctx['data'].formData[field.name] = [];
+            ctx['data'].form[field.name] = [];
             const div = event.target.dom.create('div', {}, n.innerHTML);
-            const gbtm = event.target.dom.create('span', {'v-show': '!printMode', style: 'position: absolute; right: 2px; background-color: #e7e7e785'});
-            const btm1 = event.target.dom.create('a-icon', {type: 'plus', style: 'margin: 0 5px; color: green; cursor: pointer', 'v-on:click': `formData.${field.name}.push({})`});
+            const gbtm = event.target.dom.create('span', {'v-show': '!printMode', style: 'position: absolute; right: 8px; background-color: #e7e7e785'});
+            const btm1 = event.target.dom.create('a-icon', {type: 'plus', style: 'margin: 0 5px; color: green; cursor: pointer', 'v-on:click': `form.${field.name}.push({})`});
             const btm2 = event.target.dom.create('a-icon', {type: 'minus', style: 'margin: 0 5px; color: red; cursor: pointer', 'v-on:click': `(e) => {
-                const data = this.formData.${field.name};
+                const data = this.form.${field.name};
                 for(let i = data.length - 1; i >= 0; i--) {
                     if (data[i].checked) {
                         data.splice(i, 1);
@@ -86,14 +89,26 @@ export default [
             div.querySelector('table tr > td:last-child')
                 .appendChild(gbtm);
             const tbody = div.querySelector('table > tbody');
-            tbody.setAttribute('v-show', `formData.${field.name}.length > 0`);
+            tbody.setAttribute('v-show', `form.${field.name}.length > 0`);
             (n.parentElement || n.parentNode).replaceChild(div, n);
         });
     },
 
     function (vm, event, ctx) { // 事件集成
         const events = vm.events;
-        const mtds = ctx['methods'] = {};
+        const mtds = ctx['methods'] = {
+            'validation': `() {
+                let flag = false
+                Object.keys(this.$refs).forEach(key => {
+                    const ref = Array.isArray(this.$refs[key]) ? this.$refs[key][0] : this.$refs[key]
+                    if (ref.$v && ref.options.required) {
+                        const result = ref.touch()
+                        flag = flag || result
+                    }
+                })
+                return flag
+            }`
+        };
         events.forEach(evt => {
             const evts = {};
             objEach(evt.events, (ev, key) => {
@@ -124,7 +139,7 @@ function conv(ctx, ev) {
         case 'default': {
             return ev.action.map(it => {
                 if (!Object.keys(formData).includes(cache[it.id].name)) return null;
-                return `this.formData.${cache[it.id].name} = '${it.exec.value == null ? "" : it.exec.value}'`;
+                return `this.form.${cache[it.id].name} = '${it.exec.value == null ? "" : it.exec.value}'`;
             }).join(';');
         }
         case 'script': {
