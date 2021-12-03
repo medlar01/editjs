@@ -237,7 +237,7 @@ function execApi(api, pagination) {
         .replace(/(?:^|\n|\r)\s*\/\/.*(?:\r|\n|$)/g, '\n')
         .replace(/\n/g, '')
     config = eval(`() => { return ${config} }`)()
-    axios[api.method](api.url, {...conv(api.params,  this.vm), searchCode: this.code, searchName: this.name, ...pagination}, config).then(res => {
+    axios[api.method](api.url, {...conv(api.params,  this.vm), arg1: this.code, arg2: this.name, ...pagination}, config).then(res => {
         if (res.status == 200) {
             const page = {...pagination}
             page.total = res.data.total
@@ -271,18 +271,18 @@ function execSql(sql, pagination) {
             result = Array.isArray(ref) ? ref[0].mdata : ref.mdata
         } else {
             switch(value) {
-                case "searchCode": {
+                case "arg1": {
                     result = (leftLike ? '%': '') + (this.code||'') + (rightLike ? '%': '')
                     break
                 }
-                case "searchName": {
+                case "arg2": {
                     result = (leftLike ? '%': '') + (this.name||'') + (rightLike ? '%': '')
                     break
                 }
             }
         }
         return result
-    }).join(' , ')
+    });
     console.log("sql", sql, params);
     axios.post(`/editjs/execSql/${this.id}`, {params, ...pagination}).then(res => {
         if (res.status == 200) {

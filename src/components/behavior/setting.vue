@@ -16,8 +16,10 @@
                 </a-button>
             </div>
         </a-layout-sider>
-        <a-layout-content style="padding: 20px" v-if="currEvent != null">
-            <a-card v-for="(item, key) in currEvent.events" :title="'事件：' + key" size="small" type="inner" :key="key" style="margin-bottom: 10px">
+        <a-layout-content v-if="currEvent != null">
+            <a-card v-for="(item, key) in currEvent.events" :title="'事件：' + key" size="small" type="inner" :key="key" style="margin-bottom: 10px; border-radius: 0"
+                :bodyStyle="{ padding: 0 }"
+            >
                 <a slot="extra" href="#" @click="$delete(currEvent.events, key)"><a-icon type="close" /></a>
                 <ConstEvt v-if="item.bus == 'default'" :actions="item.action" :field-data="fieldData" />
                 <ScriptEvt v-else-if="item.bus == 'script'" :actions="item.action" :field-data="fieldData" />
@@ -120,7 +122,6 @@ const FieldModal = {
             this.vis = false;
         }}>
             <a-tree blockNode show-line show-icon default-expanded-keys={['main']} onSelect={(keys, info) => {
-                window.console.log('select', keys, info)
                 if (keys.length > 0) {
                     const split = keys[0].split('-');
                     if (split[0] == 'field') {
