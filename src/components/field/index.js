@@ -37,11 +37,13 @@ const mixins = () => ({
                         if (this.$el.classList.contains('ant-input')) {
                             this.$el.style.border = '0px';
                             this.$el.style['box-shadow'] = 'unset';
+                            this.$el.style['background-color'] = '#fff0';
                         }
                         const child = this.$el.querySelector('.ant-input') || this.$el.querySelector("div[role='combobox']");
                         if (child) {
                             child.style.border = '0px';
                             child.style['box-shadow'] = 'unset';
+                            child.style['background-color'] = '#fff0';
                         }
                     });
                 }
@@ -56,7 +58,17 @@ const mixins = () => ({
 });
 
 const styles = (options, megex = {}) => {
-    return Object.assign({ width: options.width, margin: (options.printMode || options.readonly) ? '0 9px' : '0 2px' }, megex);
+    let margin = '0 8px'
+    if (options.required) {
+        margin = "0"
+    }
+    if (options.readonly) {
+        margin = "0 20px"
+    }
+    if (options.printMode) {
+        margin = null
+    }
+    return Object.assign({ width: options.width, margin }, megex);
 };
 
 // 预览时存在缓存该组件，所以使用函数每次预览返回一个新的
@@ -74,8 +86,8 @@ export function inputMaker() {
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-tooltip title="请输入必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
-                    {this.options.required ? '❗' : null}
-                    <a-input onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请输入..." />
+                    <span>{this.options.required ? '❗' : null}</span>
+                    <a-input onBlur={$blur(this, this.$listeners.blur)} style={style} v-model={this.mdata} placeholder="请输入..." />
                 </a-tooltip>);
         },
         methods: {
@@ -100,13 +112,13 @@ export function textareaMaker() {
             return { error: false }
         },
         render() {
-            const style = styles(this.options, { padding: '4px 7px' });
+            const style = styles(this.options, { padding: this.options.printMode ? null : '4px 10px' });
             style['vertical-align'] = 'top';
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata?.split(/[\s\n]/).map(it => <div>{it}</div>)}</div>) :
                 (<a-tooltip title="请输入必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
-                    {this.options.required ? '❗' : null}
-                    <a-textarea style="padding: 4px 7px" onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请输入..." />
+                    <span>{this.options.required ? '❗' : null}</span>
+                    <a-textarea onBlur={$blur(this, this.$listeners.blur)} style={style} v-model={this.mdata} placeholder="请输入..." />
                 </a-tooltip>);
         },
         methods: {
@@ -136,8 +148,8 @@ export function selectMaker() {
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{list[this.mdata]}</div>) :
                 (<a-tooltip title="请选择必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
-                    {this.options.required ? '❗' : null}
-                    <a-select allowClear onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" v-model={this.mdata} placeholder="请选择...">
+                    <span>{this.options.required ? '❗' : null}</span>
+                    <a-select allowClear onBlur={$blur(this, this.$listeners.blur)} style={style} v-model={this.mdata} placeholder="请选择...">
                         {list.map((val, idx) => (<a-select-option value={idx}>{val}</a-select-option>))}
                     </a-select>
                 </a-tooltip>);
@@ -168,8 +180,8 @@ export function dateMaker() {
             return this.options.printMode || this.options.readonly ?
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<a-tooltip title="请选择必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
-                    {this.options.required ? '❗' : null}
-                    <a-date-picker onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear v-model={this.mdata} format={this.options.format || 'YYYY-MM-DD'} placeholder="请选择..."/>
+                    <span>{this.options.required ? '❗' : null}</span>
+                    <a-date-picker onBlur={$blur(this, this.$listeners.blur)} style={style} allowClear v-model={this.mdata} format={this.options.format || 'YYYY-MM-DD'} placeholder="请选择..."/>
                 </a-tooltip>);
         },
         methods: {
@@ -208,9 +220,9 @@ function searchModalMaker() {
             return (<a-modal title="弹窗选项" visible={this.visible} onCancel={() => this.$emit('change', false)} onOk={this.ok} bodyStyle={{padding: '0'}} footer={null}>
                 <div>
                     <div style="text-align: right; padding: 2px 10px 2px; background-color: #fafafa">
-                        <a-input v-model={this.code} placeholder="编码" size="small" style="width: 120px; margin: 0 5px"/>
-                        <a-input v-model={this.name} placeholder="名称" size="small" style="width: 120px; margin: 0 5px"/>
-                        <a-button icon="search" type="dashed" shape="round" size="small" onClick={() => {
+                        <a-input v-model={this.code} placeholder="编码" style="width: 120px; margin: 0 5px"/>
+                        <a-input v-model={this.name} placeholder="名称" style="width: 120px; margin: 0 5px"/>
+                        <a-button icon="search" type="dashed" shape="round" onClick={() => {
                             this.page.current = 1;
                             this.search(this.page);
                         }}/>
@@ -280,8 +292,8 @@ export function dialogMaker() {
                 (<div style={{ ...style, display: 'inline-block' }}>{this.mdata}</div>) :
                 (<span>
                     <a-tooltip title="请选择必填项!" placement="rightTop" visible={this.error} overlayStyle={{zIndex: 900}}>
-                        {this.options.required ? '❗' : null}
-                        <a-input-search v-model={this.mdata} readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} size="small" allowClear onSearch={() => this.visible = true } placeholder="请选择..."/>
+                        <span>{this.options.required ? '❗' : null}</span>
+                        <a-input-search v-model={this.mdata} readOnly onBlur={$blur(this, this.$listeners.blur)} style={style} allowClear onSearch={() => this.visible = true } placeholder="请选择..."/>
                         {this.visible ? (<SearchModal id={this.options.options.dialog.id} idx={this.$attrs.idx} v-model={this.visible} onSelect={(record) => {
                             this.vm.cached = record
                             this.mdata = record.code
