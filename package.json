@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "lib": "vue-cli-service build --target lib --name myLib --dest lib src/tpl/gen.vue",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -12,6 +13,7 @@
     "core-js": "^3.6.5",
     "dedent": "^0.7.0",
     "element-resize-detector": "^1.2.3",
+    "http-vue-loader": "^1.4.2",
     "mockjs": "^1.1.0",
     "moment": "^2.29.1",
     "node-sass": "^6.0.1",

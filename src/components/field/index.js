@@ -217,7 +217,7 @@ function searchModalMaker() {
             }
         },
         render() {
-            return (<a-modal title="弹窗选项" visible={this.visible} onCancel={() => this.$emit('change', false)} onOk={this.ok} bodyStyle={{padding: '0'}} footer={null}>
+            return (<a-modal title="弹窗选项" visible={this.visible} onCancel={() => this.$emit('change', false)} bodyStyle={{padding: '0'}} footer={null}>
                 <div>
                     <div style="text-align: right; padding: 2px 10px 2px; background-color: #fafafa">
                         <a-input v-model={this.code} placeholder="编码" style="width: 120px; margin: 0 5px"/>
@@ -402,4 +402,12 @@ function execSql(sql, pagination) {
             this.page = page
         }
     })
+}
+
+export default function (vue) {
+    vue.component('f-input', inputMaker())
+    vue.component('f-textarea', textareaMaker())
+    vue.component('f-select', selectMaker())
+    vue.component('f-date', dateMaker())
+    vue.component('f-dialog', dialogMaker())
 }

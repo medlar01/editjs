@@ -121,6 +121,7 @@ export default {
             loading: true,
             config: {},
             insidePlugins: [],
+            cacheContent: null
         }
     },
 
@@ -281,7 +282,7 @@ export default {
             const ctx = {};
             const conversions = this.conversions;
             const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
-            conversions.map(conversion => conversion(this, event, ctx));
+            conversions.map(conversion => conversion(this, event.target, event.content, ctx));
             // 底部添加按钮
             const gbtms = DOMUtils.DOM.create('div', {style: 'background-color: #5857570d; position: fixed; top: 487px; right: 0; border-radius: 8px'});
             const btm1 = DOMUtils.DOM.create('a-button', {'v-on:click': 'printMode = false','v-show': 'printMode', type: 'link'}, '编辑模式');
@@ -353,6 +354,41 @@ export default {
                     'f-dialog': dialogMaker,
                 }
             };
+        },
+        genVuejs() {
+            const ctx = {};
+            const conversions = this.conversions;
+            const editor = this.$refs.tmceInstance.getEditor()
+            const context = this.cacheContent == null ? editor.getContent() : this.cacheContent
+            conversions.map(conversion => conversion(this, editor, context, ctx));
+            const content = ctx['body'].innerHTML;
+            const metds = ctx['methods'];
+            return prettier.format(`<template>${content}</template><script>export default {
+                    props: ${JSON.stringify(ctx['props'], null, 4).replace(/"type": "([^"]+)"/g, 'type: $1')},
+                    data() { return ${JSON.stringify(ctx['data'], null, 4).replace(/"moment": "([^"]+)"/g, 'moment: $1')} }, 
+                    provide() { return {vm: this} },
+                    methods: { ${Object.keys(metds).map(key => key + metds[key] + ' ')} }
+                }${'</'}script>`, {
+                parser: 'vue',
+                plugins: [parserHtml, parserBabel],
+                "arrowParens": "always",
+                "bracketSameLine": false,
+                "bracketSpacing": true,
+                "embeddedLanguageFormatting": "auto",
+                "htmlWhitespaceSensitivity": "css",
+                "insertPragma": false,
+                "jsxSingleQuote": false,
+                "printWidth": 80,
+                "proseWrap": "preserve",
+                "quoteProps": "as-needed",
+                "requirePragma": false,
+                "semi": true,
+                "singleQuote": false,
+                "tabWidth": 2,
+                "trailingComma": "es5",
+                "useTabs": false,
+                "vueIndentScriptAndStyle": false
+            }).replace(/\n/g, '\\n').replace(/</g, '&lt;');
         }
     }
 }
@@ -386,37 +422,9 @@ function g_plugin(vm, edi) {
                 tabs,
                 type: "tabpanel"
             }
-            const ctx = {};
-            const conversions = vm.conversions;
-            conversions.map(conversion => conversion(vm, event, ctx));
-            const content = ctx['body'].innerHTML;
-            const metds = ctx['methods'];
-            const html = prettier.format(`<template>${content}</template><script>export default {
-                    props: ${JSON.stringify(ctx['props'], null, 4).replace(/"type": "([^"]+)"/g, 'type: $1')},
-                    data() { return ${JSON.stringify(ctx['data'], null, 4).replace(/"moment": "([^"]+)"/g, 'moment: $1')} }, 
-                    provide() { return {vm: this} },
-                    methods: { ${Object.keys(metds).map(key => key + metds[key] + ' ')} }
-                }${'</'}script>`, {
-                parser: 'vue',
-                plugins: [parserHtml, parserBabel],
-                "arrowParens": "always",
-                "bracketSameLine": false,
-                "bracketSpacing": true,
-                "embeddedLanguageFormatting": "auto",
-                "htmlWhitespaceSensitivity": "css",
-                "insertPragma": false,
-                "jsxSingleQuote": false,
-                "printWidth": 80,
-                "proseWrap": "preserve",
-                "quoteProps": "as-needed",
-                "requirePragma": false,
-                "semi": true,
-                "singleQuote": false,
-                "tabWidth": 2,
-                "trailingComma": "es5",
-                "useTabs": false,
-                "vueIndentScriptAndStyle": false
-            }).replace(/\n/g, '\\n').replace(/</g, '&lt;');
+            vm.cacheContent = event.content
+            const html = vm.genVuejs()
+            vm.cacheContent = null
             event.args.initialData.code = 
             '<!DOCTYPE html>' +
             '<html>' +

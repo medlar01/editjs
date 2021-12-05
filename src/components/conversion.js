@@ -1,6 +1,6 @@
 export default [
-    function (vm, event, ctx) { // 转换field
-        event.target.StyleUtils = new event.target.editorManager.resolve('tinymce.html.Styles')({})
+    function (vm, editor, content, ctx) { // 转换field
+        editor.StyleUtils = new editor.editorManager.resolve('tinymce.html.Styles')({})
         ctx['data'] = {
             cached: null
         };
@@ -10,10 +10,10 @@ export default [
                 default: false
             }
         };
-        ctx['body'] = event.target.dom.create('body', {});
-        const form = event.target.dom.create('a-form', {}, event.content);
+        ctx['body'] = editor.dom.create('body', {});
+        const form = editor.dom.create('a-form', {}, content);
         ctx['body'].appendChild(form);
-        const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
+        const DOMUtils = editor.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-field', ctx['body']);
         if (!ctx['data'].form) ctx['data'].form = {};
 
@@ -23,7 +23,7 @@ export default [
             .forEach(it => cacheFields[it.id] = it);
         ctx['cacheFields'] = cacheFields;
         blocks.each(function (idx, n) {
-            const style = event.target.StyleUtils.parse(n.getAttribute('style'));
+            const style = editor.StyleUtils.parse(n.getAttribute('style'));
             const field = cacheFields[n.id];
             const opt = { 
                 printMode: 'printMode',
@@ -48,18 +48,18 @@ export default [
             const optionString = JSON.stringify(opt, null, 4)
                 .replace(/"printMode": "([^"]+)"/g, 'printMode: $1');
             if (!n.classList.contains('tl')) {
-                const input = event.target.dom.create('f-' + field.category, { id: n.id, ref: n.id, 'v-model': `form.${field.name}`, ':options': optionString });
+                const input = editor.dom.create('f-' + field.category, { id: n.id, ref: n.id, 'v-model': `form.${field.name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
                 ctx['data'].form[field.name] = null;
             } else {
-                const input = event.target.dom.create('f-' + field.category, { ':id': `'${n.id}_' + idx`, ':ref': `'${n.id}-' + idx`, ':idx': 'idx', 'v-model': `item.${field.name}`, ':options': optionString });
+                const input = editor.dom.create('f-' + field.category, { ':id': `'${n.id}_' + idx`, ':ref': `'${n.id}-' + idx`, ':idx': 'idx', 'v-model': `item.${field.name}`, ':options': optionString });
                 (n.parentElement || n.parentNode).replaceChild(input, n);
             }
         });
     },
 
-    function (vm, event, ctx) { // 转换table line
-        const DOMUtils = event.target.resolve('tinymce.dom.DOMUtils');
+    function (vm, editor, content, ctx) { // 转换table line
+        const DOMUtils = editor.resolve('tinymce.dom.DOMUtils');
         const blocks = DOMUtils.DOM.$('.mce-table-line', ctx['body']);
         const cacheFields = ctx['cacheFields'];
         blocks.each(function (idx, n) {
@@ -70,10 +70,10 @@ export default [
             tr.setAttribute('v-for', `(item, idx) in form.${field.name}`);
             tr.setAttribute(':key', `idx`);
             ctx['data'].form[field.name] = [];
-            const div = event.target.dom.create('div', {}, n.innerHTML);
-            const gbtm = event.target.dom.create('span', {'v-show': '!printMode', style: 'position: absolute; right: 8px; background-color: #e7e7e785'});
-            const btm1 = event.target.dom.create('a-icon', {type: 'plus', style: 'margin: 0 5px; color: green; cursor: pointer', 'v-on:click': `form.${field.name}.push({})`});
-            const btm2 = event.target.dom.create('a-icon', {type: 'minus', style: 'margin: 0 5px; color: red; cursor: pointer', 'v-on:click': `(e) => {
+            const div = editor.dom.create('div', {}, n.innerHTML);
+            const gbtm = editor.dom.create('span', {'v-show': '!printMode', style: 'position: absolute; right: 8px; background-color: #e7e7e785'});
+            const btm1 = editor.dom.create('a-icon', {type: 'plus', style: 'margin: 0 5px; color: green; cursor: pointer', 'v-on:click': `form.${field.name}.push({})`});
+            const btm2 = editor.dom.create('a-icon', {type: 'minus', style: 'margin: 0 5px; color: red; cursor: pointer', 'v-on:click': `(e) => {
                 const data = this.form.${field.name};
                 for(let i = data.length - 1; i >= 0; i--) {
                     if (data[i].checked) {
@@ -94,7 +94,7 @@ export default [
         });
     },
 
-    function (vm, event, ctx) { // 事件集成
+    function (vm, editor, content, ctx) { // 事件集成
         const events = vm.events;
         const mtds = ctx['methods'] = {
             'validation': `() {
